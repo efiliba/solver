@@ -3,15 +3,14 @@ mod combinations;
 use combinations::Combinations;
 
 fn main() {
-  let combinations = Combinations::new(9);                         // Columns * rows
+  let combinations = Combinations::new(4);                         // Columns * rows
 
   println!("Hello World! {}", bit_utils::number_of_bits_set(333));
   // println!("combinations {:?}", combinations.create_set_bits_lookup(1));
 
-    let pick = 1;
-    let from = [0, 1, 2, 3].to_vec();
-    // let from = ["a", "b", "c", "d"];
-		let items = combinations.select(&from, pick);
+    let from = ['a', 'b', 'c', 'd'].to_vec();
+		let pick = 4;
+		let items = combinations.select(from, pick);
 
 		// const expected: string[][] = [];
 		// expected[0] = ["a"];
