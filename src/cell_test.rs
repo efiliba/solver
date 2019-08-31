@@ -1,8 +1,15 @@
 // mod self::bit_utils;
 // use bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
 
-use crate::cell;
+#[cfg(test)]
+mod select {
+  use crate::cell;
 
+  #[test]
+  fn it_works() {
+    assert_eq!(2 + 2, 4);
+  }
+}
 
 // import {Cell, ICell, SetMethod, IJsonCell} from "./cell";
 

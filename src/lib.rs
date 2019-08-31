@@ -1,3 +1,4 @@
-mod bit_utils;
-// mod bit_utils_test;
-mod cell;
+pub mod utils;
+
+pub mod cell;
+mod cell_test;

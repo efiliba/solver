@@ -1,4 +1,4 @@
-use super::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
+use super::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
 
 enum SetMethod {
 	Loaded,
@@ -7,7 +7,7 @@ enum SetMethod {
 }
 
 pub fn test() {
-  println!("Hello World! {}", number_of_bits_set(333));
+  println!("Call from cell: {}", number_of_bits_set(333));
 }
 
 pub struct Cell {

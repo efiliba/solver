@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod number_of_bits_set {
-  use crate::bit_utils::number_of_bits_set;
+  use crate::utils::bit_utils::number_of_bits_set;
 
   #[test]
   fn it_returns_number_of_bits_set() {
@@ -10,12 +10,12 @@ mod number_of_bits_set {
 
 #[cfg(test)]
 mod set_bits {
-  use crate::bit_utils::bitwise_or;
+  use crate::utils::bit_utils::bitwise_or;
 
   #[test]
   fn it_should_have_all_bits_set() {
     let elements = [1, 2, 4, 8];                    	              // 0001 | 0010 | 0100 | 1000 = 1111
-    assert_eq!(bitwise_or(&elements), 15);	                        // Population count i.e. 333 = 101001101 i.e. 5 bits set
+    assert_eq!(bitwise_or(&elements), 15);
   }
 
   #[test]
@@ -33,7 +33,7 @@ mod set_bits {
 
 #[cfg(test)]
 mod only_option {
-  use crate::bit_utils::only_option;
+  use crate::utils::bit_utils::only_option;
 
   #[test]
   fn it_should_not_have_any_bits_set() {
@@ -68,7 +68,7 @@ mod only_option {
 
 #[cfg(test)]
 mod first_index_of_item_in_array_containing_bit {
-  use crate::bit_utils::containing_bit_index;
+  use crate::utils::bit_utils::containing_bit_index;
 
   #[test]
   fn it_should_have_bit_1_set_at_index_2() {
@@ -103,7 +103,7 @@ mod first_index_of_item_in_array_containing_bit {
 
 #[cfg(test)]
 mod highest_bit_position {
-  use crate::bit_utils::highest_bit_position;
+  use crate::utils::bit_utils::highest_bit_position;
 
   #[test]
   fn it_should_not_exist() {
@@ -191,7 +191,7 @@ mod highest_bit_position {
 
 #[cfg(test)]
 mod power_of_2_bit_position {
-  use crate::bit_utils::power_of_2_bit_positions;
+  use crate::utils::bit_utils::power_of_2_bit_positions;
 
   #[test]
   fn should_match() {

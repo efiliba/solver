@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod select {
-  use crate::combinations::Combinations;
+  use crate::utils::combinations::Combinations;
 
   #[test]
   fn it_returns_c_4_1_is_4() {
