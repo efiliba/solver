@@ -7,7 +7,7 @@ impl Combinations {
     let set_bits = create_set_bits_lookup(max_items_select_from);
     let mut set_bits_lookup_table: Vec<Vec<usize>> = Vec::with_capacity(max_items_select_from);
 
-    for index in 0..max_items_select_from + 1 {
+    for index in 0..=max_items_select_from {
       set_bits_lookup_table.push(Vec::new());
 
       for bit in 0..set_bits.len() {                                // Get indices of items with respective choices
@@ -68,74 +68,4 @@ fn create_set_bits_lookup(n: usize) -> Vec<usize> {
   }
 
   lookup_table
-}
-
-#[cfg(test)]
-mod select {
-  use super::Combinations;
-
-  #[test]
-  fn it_returns_c_4_1_is_4() {
-    let combinations = Combinations::new(4);                        // Columns * rows
-    let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 1;
-		let actual = combinations.select(from, pick);
-
-		let expected = vec![
-      vec!['a'],
-      vec!['b'],
-      vec!['c'],
-      vec!['d']
-    ];
-
-    assert_eq!(expected, actual);
-  }
-
-  #[test]
-  fn it_returns_c_4_2_is_6() {                                      // C(4, 2) = 4 * 3 / 2 = 6
-    let combinations = Combinations::new(4);
-    let from = vec!['a', 'b', 'c', 'd'];
-		let pick = 2;
-		let actual = combinations.select(from, pick);
-
-		let expected = vec![
-      vec!['a', 'b'],
-      vec!['a', 'c'],
-      vec!['b', 'c'],
-      vec!['a', 'd'],
-      vec!['b', 'd'],
-      vec!['c', 'd']
-    ];
-
-    assert_eq!(expected, actual);
-  }
-
-  #[test]
-  fn it_returns_c_4_3_is_4() {
-    let combinations = Combinations::new(4);
-    let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 3;
-		let actual = combinations.select(from, pick);
-
-		let expected = vec![
-      vec!['a', 'b', 'c'],
-      vec!['a', 'b', 'd'],
-      vec!['a', 'c', 'd'],
-      vec!['b', 'c', 'd']
-    ];
-
-    assert_eq!(expected, actual);
-  }
-
-  #[test]
-  fn it_returns_c_4_4_is_1() {
-    let combinations = Combinations::new(4);
-    let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 4;
-		let actual = combinations.select(from, pick);
-
-		let expected = vec![vec!['a', 'b', 'c', 'd']];
-
-    assert_eq!(expected, actual);
-  }
 }
