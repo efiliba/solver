@@ -4,7 +4,7 @@ mod select {
 
   #[test]
   fn it_returns_c_4_1_is_4() {
-    let combinations = Combinations::new(4);                        // Columns * rows
+    let combinations = Combinations::new(4);                        // columns * rows
     let from = ['a', 'b', 'c', 'd'].to_vec();
 		let pick = 1;
 		let actual = combinations.select(from, pick);

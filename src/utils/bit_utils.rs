@@ -14,7 +14,7 @@ pub fn number_of_bits_set(bits: usize) -> usize {
 pub fn bitwise_or(elements: &[usize]) -> usize {
   let mut total_ored = 0;
   for element in elements.iter() {
-    total_ored |= element;;
+    total_ored |= element;
   }
 
   total_ored

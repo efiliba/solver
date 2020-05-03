@@ -1,4 +1,4 @@
-pub struct Combinations {
+pub struct Combinations {                                           // C(n, r) = n! / r!(n-r)!
   set_bits_lookup_table: Vec<Vec<usize>>
 }
 
@@ -38,7 +38,6 @@ impl Combinations {
 
 	// Return elements where the index is in the select bit flag
 	fn select_elements(&self, from: &Vec<char>, select: usize) -> Vec<char> {
-		//SelectElementsDelegate<T> selectElements = (elements, select) => { return elements.Where((x, i) => (1 << i & select) > 0); };
 		let mut elements = Vec::with_capacity(from.len());
     for index in 0..from.len() {
 			if (1 << index) & select > 0 {

@@ -1,27 +1,105 @@
-use super::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
-
-enum SetMethod {
-	Loaded,
-	User,
-	Calculated
-}
-
-pub fn test() {
-  println!("Call from cell: {}", number_of_bits_set(333));
-}
+use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
+use crate::cell::{COLUMNS, ROWS, SetMethod, json_cell::JsonCell};
 
 pub struct Cell {
-  Columns: usize,
-  options: usize
+  // columns: usize,
   // set_bits_lookup_table: Vec<Vec<usize>>
+  
+  pub column: usize,
+  pub row: usize,
+  options: usize,
+  pub json: JsonCell,
+  total_options_remaining: usize,
+
+  set_method: SetMethod,
+  set_column: usize,
+  set_row: usize
 }
 
+
 impl Cell {
-  pub fn new(column: usize, row: usize) -> Cell {
-    let options = 55;
-    Cell { Columns: 5, options }
+  pub fn set_dimensions(columns: usize, rows: usize) {
+    unsafe {
+      COLUMNS = columns;
+      ROWS = rows;
+    }
   }
 
+  pub fn new(column: usize, row: usize) -> Cell {
+    unsafe {
+      let total_options_remaining = COLUMNS * ROWS;
+
+      Cell {
+        column,
+        row,
+        options: (1 << total_options_remaining) - 1,                // Set all bits
+        json: JsonCell::new(COLUMNS, ROWS),
+        total_options_remaining,
+        set_method: SetMethod::Unset,
+        set_column: 0,
+        set_row: 0
+      }
+    }
+  }
+
+  pub fn reset(&mut self) {
+    unsafe {
+      self.total_options_remaining = COLUMNS * ROWS;
+      self.options = (1 << self.total_options_remaining) - 1;       // Set all bits
+
+      // self.json = JsonCell::new(COLUMNS, ROWS);
+    //   this.json = { rows: [] };                                  			// Set JSON representation to all options available 
+		// for (let row: number = 0, index: number = 0; row < Cell.rows; row++) {
+		// 	const columns: IJsonCellColumn[] = [];
+		// 	for (let column = 0; column < Cell.columns; column++) {
+		// 		columns.push({ symbol: Cell.symbols[index++] });
+		// 	}
+		// 	this.json.rows.push({ columns: columns });
+		// }
+    }
+  }
+
+	pub fn solved(&self) -> bool {
+		self.total_options_remaining == 1
+  }
+  
+  pub fn remove_option_at_position(&mut self, column: usize, row: usize) -> bool { // Return if last option left after removing this option
+		let mut last_option_found = false;
+
+    unsafe {
+      let bit = 1 << COLUMNS * row + column;
+      
+      if self.options & bit > 0 {                                	  // Check if option to remove exists
+        self.options &= !bit;
+        self.total_options_remaining -= 1;
+        if self.total_options_remaining == 1 {
+          self.set_remaining_option(self.options);                  // Set last remaining option's column and row 
+          // 		this.json = { symbol: Cell.symbols[powerOf2BitPositions[this.options]] };
+          self.set_method = SetMethod::Calculated;
+          last_option_found = true;
+          // 	} else {
+            // 		this.json.rows[row].columns[column].strikeOut = true; 			// Only set strikeOut to true if option removed - else leave empty   
+        }
+      }
+    }
+    
+		last_option_found
+  }
+  
+  pub fn test(&self) {
+    unsafe {
+      println!("Call from cell: {} {}: {}: {}", COLUMNS, ROWS, self.total_options_remaining, self.options);
+    }
+  }
+
+  fn set_remaining_option(&mut self, options: usize) {
+    let index = highest_bit_position(options);
+    unsafe {
+      self.set_column = index % COLUMNS;
+      self.set_row = index / COLUMNS >> 0;
+    }
+  }
+  
 // 	constructor(public column: any, public row?: number) {
 // 		if (typeof column === "number") {
 // 			this.reset();
@@ -293,8 +371,10 @@ impl Cell {
 // 	}
 
 	pub fn contains_option_at_position(&self, column: usize, row: usize) -> bool {
-		let bit = 1 << row * self.Columns + column;
-		(self.options & bit) > 0
+    unsafe {
+      let bit = 1 << row * COLUMNS + column;
+      (self.options & bit) > 0
+    }
 	}
 
 // 	public containsOptions(checkOptions: number): boolean {
