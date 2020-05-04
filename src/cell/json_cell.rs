@@ -1,4 +1,5 @@
 use super::json_cell_row::JsonCellRow;
+use super::dimensions::Dimensions;
 
 #[derive(Debug)]
 pub struct JsonCell {
@@ -8,11 +9,11 @@ pub struct JsonCell {
 }
 
 impl JsonCell {
-  pub fn new(columns: usize, rows: usize) -> JsonCell {
-		let mut json_rows: Vec<JsonCellRow> = Vec::with_capacity(rows);
+  pub fn new(dimensions: &Dimensions) -> JsonCell {
+		let mut json_rows: Vec<JsonCellRow> = Vec::with_capacity(dimensions.rows);
 
-    for row in 0..rows {
-      json_rows.push(JsonCellRow::new(columns, row));
+    for row in 0..dimensions.rows {
+      json_rows.push(JsonCellRow::new(dimensions.columns, row));
     }
 
     JsonCell {

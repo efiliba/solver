@@ -1,8 +1,11 @@
+pub mod dimensions;
 pub mod cell;
-mod cell_test;
+
 mod json_cell_column;
 mod json_cell_row;
 mod json_cell;
+
+mod cell_test;
 
 pub const SYMBOLS: [char; 36] = [                                   // Max 6 x 6
   '1', '2', '3', '4', '5', '6',

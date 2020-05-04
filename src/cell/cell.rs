@@ -1,26 +1,8 @@
-use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
-use crate::cell::{SetMethod, json_cell::JsonCell};
-
-pub struct Dimensions {
-  columns: usize,
-  rows: usize,
-  total: usize
-}
-
-impl Dimensions {
-  pub fn new(columns: usize, rows: usize) -> Dimensions {
-    Dimensions {
-      columns,
-      rows,
-      total: columns * rows
-    }
-  }
-}
+use crate::utils::bit_utils::{highest_bit_position};
+// use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
+use crate::cell::{SetMethod, dimensions::Dimensions, json_cell::JsonCell};
 
 pub struct Cell<'a> {
-  // columns: usize,
-  // set_bits_lookup_table: Vec<Vec<usize>>
-
   dimensions: &'a Dimensions,
 
   pub column: usize,
@@ -41,7 +23,7 @@ impl<'a> Cell<'a> {
       column,
       row,
       options: (1 << dimensions.total) - 1,                         // Set all bits
-      json: JsonCell::new(dimensions.columns, dimensions.rows),
+      json: JsonCell::new(dimensions),
       total_options_remaining: dimensions.total,
       set_method: SetMethod::Unset,
       set_column: 0,
