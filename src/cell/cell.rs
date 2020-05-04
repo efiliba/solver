@@ -1,10 +1,28 @@
 use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
-use crate::cell::{COLUMNS, ROWS, SetMethod, json_cell::JsonCell};
+use crate::cell::{SetMethod, json_cell::JsonCell};
 
-pub struct Cell {
+pub struct Dimensions {
+  columns: usize,
+  rows: usize,
+  total: usize
+}
+
+impl Dimensions {
+  pub fn new(columns: usize, rows: usize) -> Dimensions {
+    Dimensions {
+      columns,
+      rows,
+      total: columns * rows
+    }
+  }
+}
+
+pub struct Cell<'a> {
   // columns: usize,
   // set_bits_lookup_table: Vec<Vec<usize>>
-  
+
+  dimensions: &'a Dimensions,
+
   pub column: usize,
   pub row: usize,
   options: usize,
@@ -16,36 +34,24 @@ pub struct Cell {
   set_row: usize
 }
 
-
-impl Cell {
-  pub fn set_dimensions(columns: usize, rows: usize) {
-    unsafe {
-      COLUMNS = columns;
-      ROWS = rows;
-    }
-  }
-
-  pub fn new(column: usize, row: usize) -> Cell {
-    unsafe {
-      let total_options_remaining = COLUMNS * ROWS;
-
-      Cell {
-        column,
-        row,
-        options: (1 << total_options_remaining) - 1,                // Set all bits
-        json: JsonCell::new(COLUMNS, ROWS),
-        total_options_remaining,
-        set_method: SetMethod::Unset,
-        set_column: 0,
-        set_row: 0
-      }
+impl<'a> Cell<'a> {
+  pub fn new(dimensions: &'a Dimensions, column: usize, row: usize) -> Self {
+    Cell {
+      dimensions,
+      column,
+      row,
+      options: (1 << dimensions.total) - 1,                         // Set all bits
+      json: JsonCell::new(dimensions.columns, dimensions.rows),
+      total_options_remaining: dimensions.total,
+      set_method: SetMethod::Unset,
+      set_column: 0,
+      set_row: 0
     }
   }
 
   pub fn reset(&mut self) {
-    unsafe {
-      self.total_options_remaining = COLUMNS * ROWS;
-      self.options = (1 << self.total_options_remaining) - 1;       // Set all bits
+    self.total_options_remaining = self.dimensions.total;
+    self.options = (1 << self.dimensions.total) - 1;       // Set all bits
 
       // self.json = JsonCell::new(COLUMNS, ROWS);
     //   this.json = { rows: [] };                                  			// Set JSON representation to all options available 
@@ -56,7 +62,6 @@ impl Cell {
 		// 	}
 		// 	this.json.rows.push({ columns: columns });
 		// }
-    }
   }
 
 	pub fn solved(&self) -> bool {
@@ -65,21 +70,18 @@ impl Cell {
   
   pub fn remove_option_at_position(&mut self, column: usize, row: usize) -> bool { // Return if last option left after removing this option
 		let mut last_option_found = false;
-
-    unsafe {
-      let bit = 1 << COLUMNS * row + column;
-      
-      if self.options & bit > 0 {                                	  // Check if option to remove exists
-        self.options &= !bit;
-        self.total_options_remaining -= 1;
-        if self.total_options_remaining == 1 {
-          self.set_remaining_option(self.options);                  // Set last remaining option's column and row 
-          // 		this.json = { symbol: Cell.symbols[powerOf2BitPositions[this.options]] };
-          self.set_method = SetMethod::Calculated;
-          last_option_found = true;
-          // 	} else {
-            // 		this.json.rows[row].columns[column].strikeOut = true; 			// Only set strikeOut to true if option removed - else leave empty   
-        }
+    let bit = 1 << self.dimensions.columns * row + column;
+    
+    if self.options & bit > 0 {                                	  // Check if option to remove exists
+      self.options &= !bit;
+      self.total_options_remaining -= 1;
+      if self.total_options_remaining == 1 {
+        self.set_remaining_option(self.options);                  // Set last remaining option's column and row 
+        // 		this.json = { symbol: Cell.symbols[powerOf2BitPositions[this.options]] };
+        self.set_method = SetMethod::Calculated;
+        last_option_found = true;
+        // 	} else {
+          // 		this.json.rows[row].columns[column].strikeOut = true; 			// Only set strikeOut to true if option removed - else leave empty   
       }
     }
     
@@ -87,17 +89,13 @@ impl Cell {
   }
   
   pub fn test(&self) {
-    unsafe {
-      println!("Call from cell: {} {}: {}: {}", COLUMNS, ROWS, self.total_options_remaining, self.options);
-    }
+    println!("Call from cell: {} {}: {}: {}", self.dimensions.columns, self.dimensions.rows, self.total_options_remaining, self.options);
   }
 
   fn set_remaining_option(&mut self, options: usize) {
     let index = highest_bit_position(options);
-    unsafe {
-      self.set_column = index % COLUMNS;
-      self.set_row = index / COLUMNS >> 0;
-    }
+    self.set_column = index % self.dimensions.columns;
+    self.set_row = index / self.dimensions.columns >> 0;
   }
   
 // 	constructor(public column: any, public row?: number) {
@@ -371,10 +369,8 @@ impl Cell {
 // 	}
 
 	pub fn contains_option_at_position(&self, column: usize, row: usize) -> bool {
-    unsafe {
-      let bit = 1 << row * COLUMNS + column;
-      (self.options & bit) > 0
-    }
+    let bit = 1 << row * self.dimensions.columns + column;
+    (self.options & bit) > 0
 	}
 
 // 	public containsOptions(checkOptions: number): boolean {

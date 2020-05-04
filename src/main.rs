@@ -1,7 +1,7 @@
 extern crate solver;
 
 use solver::utils::{bit_utils, combinations::Combinations};
-use solver::cell::cell::Cell;
+use solver::cell::cell::{Cell, Dimensions};
 
 fn main() {
   // let combinations = Combinations::new(4);                          // Columns * rows
@@ -9,10 +9,10 @@ fn main() {
   // println!("Bits set in main: {}", bit_utils::number_of_bits_set(333)); // 333 = 101001101
   // cell::test();
 
-  Cell::set_dimensions(2, 2);
-  let mut cell = Cell::new(1, 1);
-  
+  let dimensions = &Dimensions::new(2, 2);
 
+  let mut cell = Cell::new(dimensions, 1, 1);
+  
   // cell.reset();
   cell.test();
 
