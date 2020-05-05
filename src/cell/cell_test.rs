@@ -1,45 +1,118 @@
-// mod self::bit_utils;
-// use bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
-
 #[cfg(test)]
-mod select {
-  use crate::cell;
+mod cell {
+  use crate::cell::{cell::Cell, dimensions::Dimensions};
 
   #[test]
-  fn it_works() {
-    assert_eq!(2 + 2, 4);
+  fn it_contains_option_at_position() {
+    let dimensions = &Dimensions::new(4, 2);
+    let cell = Cell::new(dimensions, 0, 0);                         //  1 |  2 |  4 |  8      1 | 2 | 3 | 4
+		assert_eq!(cell.options, 255);                             		  // ------------------  =  --------------
+     																															  // 16 | 32 | 64 | 128     5 | 6 | 7 | 8
+		assert_eq!(cell.contains_option_at_position(0, 0), true);
+		assert_eq!(cell.contains_option_at_position(1, 0), true);
+		assert_eq!(cell.contains_option_at_position(2, 0), true);
+		assert_eq!(cell.contains_option_at_position(3, 0), true);
+		assert_eq!(cell.contains_option_at_position(0, 1), true);
+		assert_eq!(cell.contains_option_at_position(1, 1), true);
+		assert_eq!(cell.contains_option_at_position(2, 1), true);
+		assert_eq!(cell.contains_option_at_position(3, 1), true);
+		assert_eq!(cell.contains_option_at_position(4, 1), false);      // No bit set - overflow
+		assert_eq!(cell.contains_option_at_position(0, 2), false);
   }
 }
 
-// import {Cell, ICell, SetMethod, IJsonCell} from "./cell";
+#[cfg(test)]
+mod symbol {
+  use crate::cell::{SYMBOLS, cell::Cell, dimensions::Dimensions, SetMethod};
 
-// describe("cell", () => {
-// 	it("should contain option at position", () => {
-// 		Cell.Constructor(4, 2);                                     		// Static constructor
+  #[test]
+  fn set_by_option_at_1() {
+    let dimensions = &Dimensions::new(3, 3);
+    let mut cell = Cell::new(dimensions, 0, 0); 
 
-// 		const cell: ICell = new Cell(0, 0);                         		//  1 |  2 |  4 |  8      1 | 2 | 3 | 4
-// 		expect(cell.options).toBe(255);                             		// ------------------  =  --------------
-// 																																		// 16 | 32 | 64 | 128     5 | 6 | 7 | 8
-// 		expect(cell.containsOptionAtPosition(0, 0)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(1, 0)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(2, 0)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(3, 0)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(0, 1)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(1, 1)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(2, 1)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(3, 1)).toBe(true);
-// 		expect(cell.containsOptionAtPosition(4, 1)).toBe(false);     		// No bit set - overflow
-// 		expect(cell.containsOptionAtPosition(0, 2)).toBe(false);
-// 	});
+    cell.set_by_option(1, SetMethod::User);
+	  assert_eq!(cell.symbol(), '1');
+  }
 
-// 	it("should be 1", () => {
-// 		Cell.Constructor(4, 1);
+  #[test]
+  fn set_by_option_at_2() {
+    let dimensions = &Dimensions::new(3, 3);
+    let mut cell = Cell::new(dimensions, 0, 0); 
 
-// 		const cell: ICell = new Cell(0, 0);
-// 		cell.setByOption(1, SetMethod.user);
+    cell.set_by_option(2, SetMethod::User);                         // 1 << 1 = 2
+	  assert_eq!(cell.symbol(), '2');
+  }
 
-// 		expect(cell.symbol()).toBe("1");
-// 	});
+  #[test]
+  fn set_by_option_at_a() {
+    let dimensions = &Dimensions::new(4, 4);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_option(1 << 9, SetMethod::User);
+	  assert_eq!(cell.symbol(), 'A');
+  }
+
+  #[test]
+  fn set_by_option_at_v() {
+    let dimensions = &Dimensions::new(6, 6);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_option(1 << 30, SetMethod::User);
+	  assert_eq!(cell.symbol(), 'V');
+  }
+
+  #[test]
+  fn set_by_option_at_0() {
+    let dimensions = &Dimensions::new(6, 6);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_option(1 << 35, SetMethod::User);
+	  assert_eq!(cell.symbol(), '0');
+  }
+
+  #[test]
+  fn set_by_position_4_5() {
+    let dimensions = &Dimensions::new(6, 6);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_position(4, 5, SetMethod::User);
+	  assert_eq!(cell.symbol(), 'Z');
+  }
+
+  #[test]
+  fn set_by_position_5_5() {                                        // Max symbol
+    let dimensions = &Dimensions::new(6, 6);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_position(5, 5, SetMethod::User);
+	  assert_eq!(cell.symbol(), '0');
+  }
+
+  #[test]
+  fn set_by_symbol_3_set_and_solved() {
+    let dimensions = &Dimensions::new(2, 2);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    cell.set_by_symbol('3', SetMethod::User);
+    assert_eq!(cell.symbol(), '3');
+	  assert_eq!(cell.solved(), true);
+	  assert_eq!(cell.set_method, SetMethod::User);
+  }
+
+  #[test]
+  fn set_by_symbol_exhaustive() {
+    let dimensions = &Dimensions::new(6, 6);
+    let mut cell = Cell::new(dimensions, 0, 0); 
+
+    SYMBOLS.iter().enumerate().for_each(|(i, x)| {
+      cell.set_by_symbol(*x, SetMethod::User);
+      assert_eq!(cell.symbol(), SYMBOLS[i]);
+    });
+  }
+}
+
+
+
 
 // 	describe("Json", () => {
 // 		let cell: ICell;
@@ -333,66 +406,3 @@ mod select {
 // 			});
 // 		});
 // 	});
-
-// 	describe("Symbol", () => {
-// 		Cell.Constructor(6, 6);
-// 		const cell: ICell = new Cell(0, 0);        
-
-// 		describe("Set by option", () => {
-// 			it("should be 1", () => {
-// 				cell.setByOption(1, SetMethod.user);
-// 				expect(cell.symbol()).toBe("1");
-// 			});
-
-// 			it("should be 2", () => {
-// 				cell.setByOption(2, SetMethod.user);                  			// 1 << 1 = 2
-// 				expect(cell.symbol()).toBe("2");
-// 			});
-
-// 			it("should be A", () => {
-// 				cell.setByOption(1 << 9, SetMethod.user);
-// 				expect(cell.symbol()).toBe("A");
-// 			});
-
-// 			it("should be V", () => {
-// 				cell.setByOption(1 << 30, SetMethod.user);
-// 				expect(cell.symbol()).toBe("V");
-// 			});
-
-// 			it("should be W", () => {
-// 				cell.setByOption(2147483648, SetMethod.user);     					// 1 << 31 over max int size
-// 				expect(cell.symbol()).toBe("W");
-// 			});
-// 		});
-
-// 		describe("Set by position", () => {
-// 			it("should be Z", () => {
-// 				Cell.Constructor(6, 6);
-// 				cell.setByPosition(4, 5, SetMethod.user);
-// 				expect(cell.symbol()).toBe("Z");
-// 			});
-
-// 			it("should be 0", () => {                                    	// Max symbol
-// 				cell.setByPosition(5, 5, SetMethod.user);
-// 				expect(cell.symbol()).toBe("0");
-// 			});
-// 		});
-
-// 		describe("Set by symbol", () => {
-// 			it("should be set to 1", () => {
-// 				cell.setBySymbol("1", SetMethod.user);
-// 				expect(cell.symbol()).toBe("1");
-// 				expect(cell.solved()).toBe(true);
-// 				expect(cell.setMethod).not.toBeNull();
-// 			});
-
-// 			it("should be symbol", () => {
-// 				const symbols: string = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0";
-// 				for (let index: number; index < symbols.length; index++) {
-// 					cell.setBySymbol(symbols[index], SetMethod.user);
-// 					expect(cell.symbol()).toBe(symbols[index]);
-// 				}
-// 			});
-// 		});
-// 	});
-// });

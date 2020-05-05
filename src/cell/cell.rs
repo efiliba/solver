@@ -1,19 +1,38 @@
-use crate::utils::bit_utils::{highest_bit_position};
+use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position};
 // use crate::utils::bit_utils::{power_of_2_bit_positions, highest_bit_position, number_of_bits_set};
-use crate::cell::{SetMethod, dimensions::Dimensions, json_cell::JsonCell};
+use crate::cell::{SYMBOLS, SetMethod, dimensions::Dimensions, json_cell::JsonCell};
 
 pub struct Cell<'a> {
   dimensions: &'a Dimensions,
 
   pub column: usize,
   pub row: usize,
-  options: usize,
+  pub options: usize,
   pub json: JsonCell,
   total_options_remaining: usize,
 
-  set_method: SetMethod,
+  pub set_method: SetMethod,
   set_column: usize,
   set_row: usize
+}
+
+pub enum Cell2 {
+  OptionsCell { column: usize, row: usize },
+  SetCell { symbol: char }
+}
+
+impl Cell2 {
+  pub fn new(column: usize, row: usize) -> Self {
+    Cell2::OptionsCell { column, row }
+  }
+
+  // pub fn new(symbol: char) -> Self {
+  //   Cell2::SetCell { symbol }
+  // }
+
+  pub fn change(&mut self) {
+    *self = Cell2::SetCell { symbol: 'a' };
+  }
 }
 
 impl<'a> Cell<'a> {
@@ -71,7 +90,7 @@ impl<'a> Cell<'a> {
   }
   
   pub fn test(&self) {
-    println!("Call from cell: {} {}: {}: {}", self.dimensions.columns, self.dimensions.rows, self.total_options_remaining, self.options);
+    println!("Call from cell: {} {}", self.total_options_remaining, self.options);
   }
 
   fn set_remaining_option(&mut self, options: usize) {
@@ -240,6 +259,10 @@ impl<'a> Cell<'a> {
 // 		//return this.options === cell.options;
 // 	}
 
+  pub fn symbol(&self, ) -> char {
+    SYMBOLS[self.set_row * self.dimensions.columns + self.set_column]
+  }
+
 // 	public symbol(): string {
 // 		return Cell.symbols[this.setRow * Cell.columns + this.setColumn];
 // 	}
@@ -334,9 +357,29 @@ impl<'a> Cell<'a> {
 // 		this.clearAllExceptAtPosition(this.setColumn = column, this.setRow = row, this.setMethod = setMethod);
 // 	}
 
+	pub fn set_by_position(&mut self, column: usize, row: usize, set_method: SetMethod) {
+    // this.clearAllExceptAtPosition(this.setColumn = column, this.setRow = row, this.setMethod = setMethod);
+    self.set_column = column;
+    self.set_row = row;
+    self.set_method = set_method;
+		self.clear_all_except_at_position(self.set_column, self.set_row, self.set_method);
+	}
+
 // 	private setByIndex(index: number, setMethod: SetMethod) {
 // 		this.clearAllExceptAtPosition(this.setColumn = index % Cell.columns, this.setRow = index / Cell.columns >> 0, this.setMethod = setMethod);
 // 	}
+
+  fn set_by_index(&mut self, index: usize, set_method: SetMethod) {
+    self.set_column = index % self.dimensions.columns;
+    self.set_row = index / self.dimensions.columns >> 0;
+    self.set_method = set_method;
+		self.clear_all_except_at_position(self.set_column, self.set_row, self.set_method);
+	}
+
+	pub fn set_by_option(&mut self, option: usize, set_method: SetMethod) {
+    self.set_by_index(power_of_2_bit_positions(option), set_method);
+  }
+
 
 // 	public setByOption(option: number, setMethod: SetMethod) {
 // 		this.setByIndex(powerOf2BitPositions[option], setMethod);
@@ -345,6 +388,15 @@ impl<'a> Cell<'a> {
 // 	public setBySymbol(symbol: string, setMethod: SetMethod){
 // 		this.setByIndex(Cell.symbols.indexOf(symbol), setMethod);
 // 	}
+
+
+  pub fn set_by_symbol(&mut self, symbol: char, set_method: SetMethod) {
+    fn find_symbol_index(symbol: char) -> usize {
+      SYMBOLS.iter().position(|&x| x == symbol).unwrap()
+    }
+
+    self.set_by_index(find_symbol_index(symbol), set_method);
+	}
 
 // 	public containsOption(option: number): boolean {
 // 		return (this.options & option) > 0;
@@ -381,6 +433,12 @@ impl<'a> Cell<'a> {
 // 		this.json = { symbol: Cell.symbols[powerOf2BitPositions[this.options]], setMethod };
 // 		this.totalOptionsRemaining = 1;
 // 	}
+
+	fn clear_all_except_at_position(&mut self, column: usize, row: usize, set_method: SetMethod) {
+		self.options = 1 << self.dimensions.columns * row + column;
+		// this.json = { symbol: Cell.symbols[powerOf2BitPositions[this.options]], setMethod };
+		self.total_options_remaining = 1;
+	}
 
 // 	public removedOptionsPerRow(row: number): number[] {
 // 		const removedOptions: number[] = [];
