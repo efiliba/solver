@@ -1,6 +1,7 @@
 use crate::cell::{dimensions::Dimensions, json_cell::JsonCell, SetMethod, SYMBOLS};
 use crate::utils::bit_utils::{highest_bit_position, number_of_bits_set, power_of_2_bit_positions};
 
+#[derive(Debug)]
 pub struct Cell<'a> {
   dimensions: &'a Dimensions,
 

@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Dimensions {
   pub columns: usize,
   pub rows: usize,
