@@ -1,7 +1,7 @@
 extern crate solver;
 
 use solver::utils::{bit_utils, combinations::Combinations};
-use solver::cell::cell::{Cell, Dimensions};
+use solver::cell::{cell::Cell, dimensions::Dimensions};
 
 fn main() {
   // let combinations = Combinations::new(4);                          // Columns * rows
@@ -14,22 +14,18 @@ fn main() {
   let mut cell = Cell::new(dimensions, 1, 1);
   
   // cell.reset();
-  cell.test();
 
   println!("Column: {}", cell.column);
   println!("Row: {}", cell.row);
   println!("Solved: {}", cell.solved());
 
   let last_option_found = cell.remove_option_at_position(0, 0);
-  cell.test();
   println!("Last option: {}", last_option_found);
 
   let last_option_found = cell.remove_option_at_position(0, 1);
-  cell.test();
   println!("Last option: {}", last_option_found);
 
   let last_option_found = cell.remove_option_at_position(1, 0);
-  cell.test();
   println!("Last option: {}", last_option_found);
   println!("Solved: {}", cell.solved());
 

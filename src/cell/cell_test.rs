@@ -26,7 +26,7 @@ mod symbol {
   use crate::cell::{SYMBOLS, cell::Cell, dimensions::Dimensions, SetMethod};
 
   #[test]
-  fn set_by_option_at_1() {
+  fn it_sets_by_option_1() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -35,7 +35,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_option_at_2() {
+  fn it_sets_by_option_2() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -44,7 +44,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_option_at_a() {
+  fn it_sets_by_option_a() {
     let dimensions = &Dimensions::new(4, 4);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -53,7 +53,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_option_at_v() {
+  fn it_sets_by_option_v() {
     let dimensions = &Dimensions::new(6, 6);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -62,7 +62,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_option_at_0() {
+  fn it_sets_by_option_0() {
     let dimensions = &Dimensions::new(6, 6);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -71,7 +71,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_position_4_5() {
+  fn it_sets_by_position_4_5() {
     let dimensions = &Dimensions::new(6, 6);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -80,7 +80,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_position_5_5() {                                        // Max symbol
+  fn it_sets_by_position_5_5() {                                        // Max symbol
     let dimensions = &Dimensions::new(6, 6);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -89,7 +89,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_symbol_3_set_and_solved() {
+  fn it_set_by_symbol_3_and_is_solved() {
     let dimensions = &Dimensions::new(2, 2);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -100,7 +100,7 @@ mod symbol {
   }
 
   #[test]
-  fn set_by_symbol_exhaustive() {
+  fn it_set_by_all_symbols() {
     let dimensions = &Dimensions::new(6, 6);
     let mut cell = Cell::new(dimensions, 0, 0); 
 
@@ -116,7 +116,7 @@ mod cell_3x3 {
   use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod};
 
   #[test]
-  fn set_cell_unmodified() {
+  fn it_sets_cell_with_no_modifications() {
     let dimensions = &Dimensions::new(3, 3);
     let cell = Cell::new(dimensions, 0, 0);
 
@@ -126,14 +126,14 @@ mod cell_3x3 {
     assert_eq!(cell.set_method, SetMethod::Unset);
 
     assert_eq!(cell.contains_option_at_position(0, 0), true);       // Contains option at (0, 0)
-    assert_eq!(cell.contains_option(0), false);                     // Does not contain option 0
+    assert_eq!(cell.contains_option(0), false);                     // Does not contain option 0 -> only 1..9 valid
     assert_eq!(cell.contains_option(1), true);                      // Contains option 1
     assert_eq!(cell.contains_option(3), true);                      // Contain either option 1 or 2
     assert_eq!(cell.contains_options(3), true);                     // Contain both options 1 and 2
   }
 
   #[test]
-  fn set_at_position_0_2() {
+  fn it_sets_cell_by_position_0_2() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -154,7 +154,7 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn set_option_4() {
+  fn it_sets_cell_by_option_4() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -179,25 +179,25 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn reset_cell() {
+  fn it_resets_the_cell() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
     cell.set_by_position(0, 2, SetMethod::User);
     cell.reset();
 
-    assert_eq!(cell.options, 511);
-    assert_eq!(cell.total_options_remaining, 9);
+    assert_eq!(cell.options, usize::pow(2, 3 * 3) - 1);             // All options available i.e. 511
+    assert_eq!(cell.total_options_remaining, 3 * 3);
     assert_eq!(cell.solved(), false);
     assert_eq!(cell.set_method, SetMethod::Unset);
   }
 
   #[test]
-  fn remove_bit_16() {
+  fn it_removes_bit_16() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
-    assert_eq!(cell.remove_option_at_position(1, 1), false);        // Remove option bit = 16 - not last option
+    assert_eq!(cell.remove_option_at_position(1, 1), false);        // Remove option bit = 16 -> not last option
     assert_eq!(cell.total_options_remaining, 8);
 
   // 			expect(cell.json).toEqual({
@@ -211,7 +211,7 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn bit_16_already_removed() {
+  fn it_already_has_bit_16_removed() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -222,7 +222,7 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn remove_bits_1_2_4() {
+  fn it_removes_bits_1_2_4() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -242,7 +242,7 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn does_not_contain_bit_2() {
+  fn it_does_not_contain_bit_2() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -256,7 +256,7 @@ mod cell_3x3 {
   }
   
   #[test]
-  fn options_removed_per_row() {
+  fn it_removes_options_per_row() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -274,7 +274,7 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn options_not_removed() {
+  fn it_does_not_remove_options() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
@@ -287,53 +287,67 @@ mod cell_3x3 {
   }
 
   #[test]
-  fn remove_bottom_row() {
+  fn it_removes_bottom_row() {
     let dimensions = &Dimensions::new(3, 3);
     let mut cell = Cell::new(dimensions, 0, 0);
 
     cell.remove_option_at_position(1, 1);                           // Continue from previous tests
     cell.remove_options(7);
 
-    assert_eq!(cell.remove_options(256 + 128 + 64), false);         // Remove bottom row
-    // let mut removed_options = Vec::with_capacity(dimensions.columns);
-    // cell.removed_options_per_row(2, &mut removed_options);
-    // assert_eq!(removed_options, [0, 1, 2]);                         // All removed
-  }
-}
+    assert_eq!(cell.remove_options(64 + 128 + 256), false);         // Remove bottom row
+    let mut removed_options = Vec::with_capacity(dimensions.columns);
+    cell.removed_options_per_row(2, &mut removed_options);
+    assert_eq!(removed_options, [0, 1, 2]);                         // All removed
 
-	// 		it("should have bottom row removed", () => {
-	// 			expect(cell.removeOptions(256 + 128 + 64)).toBe(false);     // Remove bottom row
-	// 			expect(cell.removedOptionsPerRow(2)).toEqual([0, 1, 2]);    // All removed
-	// 			expect(cell.json).toEqual({
+  // 			expect(cell.json).toEqual({
 	// 				rows:
 	// 				[
 	// 					{ columns: [{ symbol: '1', strikeOut: true }, { symbol: '2', strikeOut: true }, { symbol: '3', strikeOut: true }] },
 	// 					{ columns: [{ symbol: '4' }, { symbol: '5', strikeOut: true }, { symbol: '6' }] },
 	// 					{ columns: [{ symbol: '7', strikeOut: true }, { symbol: '8', strikeOut: true }, { symbol: '9', strikeOut: true }] }
 	// 				]
-	// 			});
-	// 			expect(cell.totalOptionsRemaining).toBe(2);
-	// 			expect(cell.solved()).toBe(false);
-	// 			expect(cell.setMethod).toBeNull();
-	// 		});
+  // 			});
+  
+    assert_eq!(cell.total_options_remaining, 2);
+    assert_eq!(cell.solved(), false);
+    assert_eq!(cell.set_method, SetMethod::Unset);
+  }
 
-	// 		it("should have bit 32 removed leaving bit 8", () => {
-	// 			expect(cell.removeOptions(32 + 4 + 2 + 1)).toBe(true);  		// Only 32 removed leaving 8 - RETURNS last remaining
-	// 			expect(cell.removedOptionsPerRow(1)).toEqual([1, 2]);      	// Only first bit in row left
-	// 			expect(cell.json).toEqual({ symbol: '4' });
+  #[test]
+  fn it_removes_bit_32_leaving_bit_8() {
+    let dimensions = &Dimensions::new(3, 3);
+    let mut cell = Cell::new(dimensions, 0, 0);
 
-	// 			expect(cell.totalOptionsRemaining).toBe(1);
-	// 			expect(cell.containsOptionAtPosition(0, 1)).toBe(true);
-	// 			expect(cell.containsOption(8)).toBe(true);
-	// 			expect(cell.symbol()).toBe("4");
-	// 		});
+    cell.remove_option_at_position(1, 1);                           // Continue from previous tests
+    cell.remove_options(7);
+    cell.remove_options(64 + 128 + 256);
 
-	// 		it("should be solved", () => {
-	// 			expect(cell.solved()).toBe(true);
-	// 			expect(cell.setMethod).not.toBeNull();
-	// 		});
-	// 	});
-	// });
+    assert_eq!(cell.remove_options(1 + 2 + 4 + 32), true);  		    // Only 32 removed leaving 8 - RETURNS last remaining
+    let mut removed_options = Vec::with_capacity(dimensions.columns);
+    cell.removed_options_per_row(1, &mut removed_options);
+    assert_eq!(removed_options, [1, 2]);      	                    // Only first bit in row left
+	// 			assert_eq!(cell.json).toEqual({ symbol: '4' });
+
+    assert_eq!(cell.total_options_remaining, 1);
+    assert_eq!(cell.contains_option_at_position(0, 1), true);
+    assert_eq!(cell.contains_option(8), true);
+    assert_eq!(cell.symbol(), '4');
+  }
+
+  #[test]
+  fn it_is_solved() {
+    let dimensions = &Dimensions::new(3, 3);
+    let mut cell = Cell::new(dimensions, 0, 0);
+
+    cell.remove_option_at_position(1, 1);                           // Continue from previous tests
+    cell.remove_options(7);
+    cell.remove_options(64 + 128 + 256);
+    cell.remove_options(1 + 2 + 4 + 32);
+
+    assert_eq!(cell.solved(), true);
+    assert_eq!(cell.set_method, SetMethod::Calculated);
+  }
+}
 
 
 // 	describe("Json", () => {
@@ -471,160 +485,3 @@ mod cell_3x3 {
 // 		});
 // 	});
 
-// 	describe("3x3", () => {
-// 		let cell: ICell;
-
-// 		describe("Set", () => {
-// 			beforeEach(() => {
-// 				Cell.Constructor(3, 3);
-// 				cell = new Cell(0, 0);
-// 			});
-
-// 			it("should be unmodified", () => {
-// 				expect(cell.options).toBe(Math.pow(2, 3 * 3) - 1);          // All options available i.e. 511
-// 				expect(cell.totalOptionsRemaining).toBe(3 * 3);
-// 				expect(cell.solved()).toBe(false);                          // Not solved
-// 				expect(cell.setMethod).toBeNull();
-
-// 				expect(cell.containsOptionAtPosition(0, 0)).toBe(true);     // Contains option at (0, 0)
-// 				expect(cell.containsOption(0)).toBe(false);                 // Does not contain option 0
-// 				expect(cell.containsOption(1)).toBe(true);                  // Contains option 1
-// 				expect(cell.containsOption(3)).toBe(true);                  // Contain either option 1 or 2
-// 				expect(cell.containsOptions(3)).toBe(true);                 // Contain both options 1 and 2
-// 			});
-
-// 			it("should have cell (0, 2) set", () => {
-// 				cell.setByPosition(0, 2, SetMethod.user);                  	// Set cell to column 0 row 2 i.e. symbol 7, bit 64
-// 				expect(cell.totalOptionsRemaining).toBe(1);
-// 				expect(cell.symbol()).toBe("7");
-// 				expect(cell.solved()).toBe(true);
-// 				expect(cell.setMethod).not.toBeNull();
-
-// 				expect(cell.containsOptionAtPosition(0, 0)).toBe(false);
-// 				expect(cell.containsOptionAtPosition(0, 2)).toBe(true);
-// 				expect(cell.containsOption(0)).toBe(false);
-// 				expect(cell.containsOption(32)).toBe(false);
-// 				expect(cell.containsOption(64)).toBe(true);
-// 				expect(cell.containsOption(65)).toBe(true);              		// bit 1 or 64
-// 				expect(cell.containsOptions(64)).toBe(true);
-// 				expect(cell.containsOptions(65)).toBe(false);               // bit 1 and 64
-// 			});
-
-// 			it("should have option 4 set", () => {
-// 				cell.setByOption(4, SetMethod.user);                        // Set cell to options 4 i.e. highest of bits 1 and 4
-// 				expect(cell.totalOptionsRemaining).toBe(1);
-// 				expect(cell.symbol()).toBe("3");
-// 				expect(cell.solved()).toBe(true);                           // Only 1 bit set
-// 				expect(cell.setMethod).not.toBeNull();
-
-// 				expect(cell.containsOptionAtPosition(0, 0)).toBe(false);    // Only contains bit 4
-// 				expect(cell.containsOptionAtPosition(2, 0)).toBe(true);
-// 				expect(cell.containsOptionAtPosition(0, 2)).toBe(false);
-// 				expect(cell.containsOption(0)).toBe(false);
-// 				expect(cell.containsOption(32)).toBe(false);
-// 				expect(cell.containsOption(1)).toBe(false);
-// 				expect(cell.containsOption(4)).toBe(true);
-// 				expect(cell.containsOption(5)).toBe(true);                  // bit 1 or 4
-// 				expect(cell.containsOption(7)).toBe(true);                  // 1, 2 or 4
-// 				expect(cell.containsOptions(5)).toBe(false);
-// 				expect(cell.containsOptions(4)).toBe(true);
-// 				expect(cell.containsOptions(7)).toBe(false);                // bit 1, 2 and 4
-// 			});
-
-// 			it("should have options reset", () => {
-// 				cell.reset();
-// 				expect(cell.options).toBe(Math.pow(2, 3 * 3) - 1);          // All options reset i.e. 511
-// 				expect(cell.totalOptionsRemaining).toBe(3 * 3);
-// 				expect(cell.solved()).toBe(false);
-// 				expect(cell.setMethod).toBeNull();
-// 			});
-// 		});
-
-// 		describe("Options removed", () => {
-// 			it("should have bit 16 removed", () => {
-// 				Cell.Constructor(3, 3);
-// 				cell = new Cell(0, 0);
-
-// 				expect(cell.removeOptionAtPosition(1, 1)).toBe(false);   		// Remove option bit = 16 - not last option
-// 				expect(cell.totalOptionsRemaining).toBe(8);
-// 				expect(cell.json).toEqual({
-// 					rows:
-// 					[
-// 						{ columns: [{ symbol: '1' }, { symbol: '2' }, { symbol: '3' }] },
-// 						{ columns: [{ symbol: '4' }, { symbol: '5', strikeOut: true }, { symbol: '6' }] },
-// 						{ columns: [{ symbol: '7' }, { symbol: '8' }, { symbol: '9' }] }
-// 					]
-// 				});
-// 			});
-
-// 			it("should have bit 16 already  removed", () => {
-// 				expect(cell.removeOption(16)).toBe(false);            			// Already removed
-// 				expect(cell.totalOptionsRemaining).toBe(8);
-// 			});
-
-// 			it("should have bits 1 + 2 + 4 removed", () => {
-// 				expect(cell.removeOptions(7)).toBe(false);                	// Removed 4, 2 and 1
-// 				expect(cell.totalOptionsRemaining).toBe(5);
-// 				expect(cell.json).toEqual({
-// 					rows:
-// 					[
-// 						{ columns: [{ symbol: '1', strikeOut: true }, { symbol: '2', strikeOut: true }, { symbol: '3', strikeOut: true }] },
-// 						{ columns: [{ symbol: '4' }, { symbol: '5', strikeOut: true }, { symbol: '6' }] },
-// 						{ columns: [{ symbol: '7' }, { symbol: '8' }, { symbol: '9' }] }
-// 					]
-// 				});
-// 			});
-
-// 			it("should not contain bit 2", () => {
-// 				const options: number = cell.options;                				// 488 = 000 101 111
-// 				expect(cell.containsOption(2)).toBe(false);
-// 				expect(cell.removeOptionAtPosition(1, 0)).toBe(false);      // 2 already removed
-// 				expect(cell.options).toBe(options);
-// 				expect(cell.totalOptionsRemaining).toBe(5);
-// 			});
-
-// 			it("should have options removed", () => {
-// 				expect(cell.removedOptionsPerRow(0)).toEqual([0, 1, 2]);    // 0 0 0    - all removed from row 0
-// 				expect(cell.removedOptionsPerRow(1)).toEqual([1]);          // 1 0 1    - only 2nd option removed
-// 				expect(cell.removedOptionsPerRow(2)).toEqual([]);           // 1 1 1    - no options removed
-// 			});
-
-// 			it("should have nothing removed", () => {
-// 				expect(cell.removeOptions(488)).toBe(false);                // Attempt to remove all
-// 				expect(cell.removeOptions(511)).toBe(false);
-// 				expect(cell.totalOptionsRemaining).toBe(5);                 // Nothing removed
-// 			});
-
-// 			it("should have bottom row removed", () => {
-// 				expect(cell.removeOptions(256 + 128 + 64)).toBe(false);     // Remove bottom row
-// 				expect(cell.removedOptionsPerRow(2)).toEqual([0, 1, 2]);    // All removed
-// 				expect(cell.json).toEqual({
-// 					rows:
-// 					[
-// 						{ columns: [{ symbol: '1', strikeOut: true }, { symbol: '2', strikeOut: true }, { symbol: '3', strikeOut: true }] },
-// 						{ columns: [{ symbol: '4' }, { symbol: '5', strikeOut: true }, { symbol: '6' }] },
-// 						{ columns: [{ symbol: '7', strikeOut: true }, { symbol: '8', strikeOut: true }, { symbol: '9', strikeOut: true }] }
-// 					]
-// 				});
-// 				expect(cell.totalOptionsRemaining).toBe(2);
-// 				expect(cell.solved()).toBe(false);
-// 				expect(cell.setMethod).toBeNull();
-// 			});
-
-// 			it("should have bit 32 removed leaving bit 8", () => {
-// 				expect(cell.removeOptions(32 + 4 + 2 + 1)).toBe(true);  		// Only 32 removed leaving 8 - RETURNS last remaining
-// 				expect(cell.removedOptionsPerRow(1)).toEqual([1, 2]);      	// Only first bit in row left
-// 				expect(cell.json).toEqual({ symbol: '4' });
-
-// 				expect(cell.totalOptionsRemaining).toBe(1);
-// 				expect(cell.containsOptionAtPosition(0, 1)).toBe(true);
-// 				expect(cell.containsOption(8)).toBe(true);
-// 				expect(cell.symbol()).toBe("4");
-// 			});
-
-// 			it("should be solved", () => {
-// 				expect(cell.solved()).toBe(true);
-// 				expect(cell.setMethod).not.toBeNull();
-// 			});
-// 		});
-// 	});
