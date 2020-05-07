@@ -5,6 +5,7 @@ mod number_of_bits_set {
   #[test]
   fn it_returns_number_of_bits_set() {
     assert_eq!(number_of_bits_set(333), 5);	                        // Population count i.e. 333 = 101001101 i.e. 5 bits set
+    assert_eq!(number_of_bits_set(0b101001101), 5);
   }
 }
 
@@ -171,6 +172,11 @@ mod highest_bit_position {
   }
 
   #[test]
+  fn it_should_be_35_in_100000_010101_010101_010101_010101_010101() {
+    assert_eq!(highest_bit_position(0b_100000_010101_010101_010101_010101_010101), 35);
+  }
+
+  #[test]
   fn it_should_match_highest_bit_position_function() {
     fn local_highest_bit_position(value: usize) -> usize {
       let mut index = 0;
@@ -183,8 +189,12 @@ mod highest_bit_position {
       index - 1
     }
 
-    for index in 1..32 {
-      assert_eq!(highest_bit_position(index), local_highest_bit_position(index));
+    let mut acc = 0;
+    for index in 0..63 {
+      let power = usize::pow(2, index);
+      acc += power;
+      assert_eq!(highest_bit_position(power), index as usize);
+      assert_eq!(highest_bit_position(acc), local_highest_bit_position(acc));
     }
 	}
 }
@@ -207,10 +217,10 @@ mod power_of_2_bit_position {
     assert_eq!(power_of_2_bit_positions(512), 9);
     assert_eq!(power_of_2_bit_positions(1024), 10);
 
-    for index in 0..32 {
+    for index in 0..64 {
       assert_eq!(power_of_2_bit_positions(1 << index), index);
     }
 
-    assert_eq!(power_of_2_bit_positions(2147483648), 31);
+    assert_eq!(power_of_2_bit_positions(0b_10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000), 63);
   }
 }

@@ -46,17 +46,27 @@ pub fn containing_bit_index(array: &[usize], bit: usize) -> usize {
 }
 
 pub fn highest_bit_position(v: usize) -> usize {
-  let multiply_de_bruijn_bit_position = [0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30, 8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31,
-    0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30, 8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31];  // Duplicated
+  let multiply_de_bruijn_bit_position = [
+    0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
+    8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31];
 
-  let mut u = v;
-  u |= u >> 1;                                                      // first round down to one less than a power of 2 
-  u |= u >> 2;
-  u |= u >> 4;
-  u |= u >> 8;
-  u |= u >> 16;
+  fn highest_bit_index(mut n: usize) -> usize {
+    let mut bit = 0b1;
+    let mut next = n | n >> 1;
+    while next != n {
+      n = next;
+      bit <<= 1;
+      next = n | n >> bit;
+    }
 
-  multiply_de_bruijn_bit_position[(u * 0x07C4ACDD >> 27) + 32]
+    (n * 0x07C4ACDD >> 27) % 32
+  }
+
+  if v > 0xFFFFFFFF {                                               // more than 32 bits -> calc top half
+    return 32 + multiply_de_bruijn_bit_position[highest_bit_index(v >> 32)];
+  }
+
+  multiply_de_bruijn_bit_position[highest_bit_index(v)]
 }
 
 pub fn power_of_2_bit_positions(bit: usize) -> usize {
