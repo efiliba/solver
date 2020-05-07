@@ -1,3 +1,4 @@
+use std::fmt::{self, Display};
 use crate::cell::{dimensions::Dimensions, json_cell::JsonCell, SetMethod, SYMBOLS};
 use crate::utils::bit_utils::{highest_bit_position, number_of_bits_set, power_of_2_bit_positions};
 
@@ -14,6 +15,13 @@ pub struct Cell<'a> {
   pub set_method: SetMethod,
   set_column: usize,
   set_row: usize,
+}
+
+
+impl Display for Cell<'_> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{:b}", self.options)
+  }
 }
 
 pub enum Cell2 {

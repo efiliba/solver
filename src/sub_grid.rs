@@ -1,3 +1,4 @@
+use std::fmt::{self, Display};
 use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod, SYMBOLS};
 
 // use crate::utils::bit_utils::{highest_bit_position, number_of_bits_set, power_of_2_bit_positions};
@@ -10,6 +11,22 @@ pub struct SubGrid<'a> {
   pub row: usize,
   cells: Vec<Vec<Cell<'a>>>
 }
+
+impl Display for SubGrid<'_> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let mut output = String::new();
+
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        fmt::write(&mut output, format_args!("{}\n", self.cells[row][column]))
+          .expect("Error writing cell in sub-grid");
+      }
+    }
+
+    write!(f, "{}", output)
+  }
+}
+
 
 impl<'a> SubGrid<'a> {
   pub fn new(dimensions: &'a Dimensions, column: usize, row: usize) -> Self {

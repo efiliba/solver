@@ -17,7 +17,7 @@ fn main() {
   let dimensions = &Dimensions::new(2, 2);
 
   let subgid = SubGrid::new(dimensions, 0, 0);
-  println!("subgid {:#?}", subgid);
+  println!("***  subgid **** \n{}", subgid);
 
   let mut cell2 = Cell2::new(1, 1);
   match cell2 {
@@ -34,8 +34,12 @@ fn main() {
   println!("======================================\n");
 
 
-  let cell = Cell::new(dimensions, 0, 0);
-  println!("options: {}", cell.options);
+  let mut cell = Cell::new(dimensions, 0, 0);
+  // println!("options: {}", cell.options);
+
+  cell.remove_option(1);
+  println!("cell {}", cell);
+
   // cell.reset();
   // cell.test();
 
