@@ -268,8 +268,8 @@ impl<'a> Cell<'a> {
     self.total_options_remaining = 1;
   }
 
-  pub fn removed_options_per_row(&mut self, row: usize, removed_options: &mut Vec<usize>) {
-    removed_options.clear();
+  pub fn removed_options_per_row(&mut self, row: usize) -> Vec<usize> {
+    let mut removed_options = Vec::with_capacity(self.dimensions.columns);
 
     let mut bit = 1 << row * self.dimensions.columns;
     for column in 0..self.dimensions.columns {
@@ -278,6 +278,8 @@ impl<'a> Cell<'a> {
     	}
       bit <<= 1;                                                    // bit = 1 << row * columns + column
     }
+
+    removed_options
   }
 
   // 	// Remove options iff cell contains other options

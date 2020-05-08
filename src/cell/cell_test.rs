@@ -8,14 +8,14 @@ mod cell {
     let cell = Cell::new(dimensions, 0, 0);                         //  1 |  2 |  4 |  8      1 | 2 | 3 | 4
 		assert_eq!(cell.options, 255);                             		  // ------------------  =  --------------
      																															  // 16 | 32 | 64 | 128     5 | 6 | 7 | 8
-		assert_eq!(cell.contains_option_at_position(0, 0), true);
-		assert_eq!(cell.contains_option_at_position(1, 0), true);
-		assert_eq!(cell.contains_option_at_position(2, 0), true);
-		assert_eq!(cell.contains_option_at_position(3, 0), true);
-		assert_eq!(cell.contains_option_at_position(0, 1), true);
-		assert_eq!(cell.contains_option_at_position(1, 1), true);
-		assert_eq!(cell.contains_option_at_position(2, 1), true);
-		assert_eq!(cell.contains_option_at_position(3, 1), true);
+		assert!(cell.contains_option_at_position(0, 0));
+		assert!(cell.contains_option_at_position(1, 0));
+		assert!(cell.contains_option_at_position(2, 0));
+		assert!(cell.contains_option_at_position(3, 0));
+		assert!(cell.contains_option_at_position(0, 1));
+		assert!(cell.contains_option_at_position(1, 1));
+		assert!(cell.contains_option_at_position(2, 1));
+		assert!(cell.contains_option_at_position(3, 1));
 		assert_eq!(cell.contains_option_at_position(4, 1), false);      // No bit set - overflow
 		assert_eq!(cell.contains_option_at_position(0, 2), false);
   }
@@ -95,7 +95,7 @@ mod symbol {
 
     cell.set_by_symbol('3', SetMethod::User);
     assert_eq!(cell.symbol(), '3');
-	  assert_eq!(cell.solved(), true);
+	  assert!(cell.solved());
 	  assert_eq!(cell.set_method, SetMethod::User);
   }
 
@@ -125,11 +125,11 @@ mod cell_3x3 {
     assert_eq!(cell.solved(), false);                               // Not solved
     assert_eq!(cell.set_method, SetMethod::Unset);
 
-    assert_eq!(cell.contains_option_at_position(0, 0), true);       // Contains option at (0, 0)
+    assert!(cell.contains_option_at_position(0, 0));                // Contains option at (0, 0)
     assert_eq!(cell.contains_option(0), false);                     // Does not contain option 0 -> only 1..9 valid
-    assert_eq!(cell.contains_option(1), true);                      // Contains option 1
-    assert_eq!(cell.contains_option(3), true);                      // Contain either option 1 or 2
-    assert_eq!(cell.contains_options(3), true);                     // Contain both options 1 and 2
+    assert!(cell.contains_option(1));                               // Contains option 1
+    assert!(cell.contains_option(3));                               // Contain either option 1 or 2
+    assert!(cell.contains_options(3));                              // Contain both options 1 and 2
   }
 
   #[test]
@@ -140,16 +140,16 @@ mod cell_3x3 {
     cell.set_by_position(0, 2, SetMethod::User);                  	// Set cell to column 0 row 2 i.e. symbol 7, bit 64
     assert_eq!(cell.total_options_remaining, 1);
     assert_eq!(cell.symbol(), '7');
-    assert_eq!(cell.solved(), true);
+    assert!(cell.solved());
     assert_eq!(cell.set_method, SetMethod::User);
 
     assert_eq!(cell.contains_option_at_position(0, 0), false);
-    assert_eq!(cell.contains_option_at_position(0, 2), true);
+    assert!(cell.contains_option_at_position(0, 2));
     assert_eq!(cell.contains_option(0), false);
     assert_eq!(cell.contains_option(32), false);
-    assert_eq!(cell.contains_option(64), true);
-    assert_eq!(cell.contains_option(65), true);                     // bit 1 or 64
-    assert_eq!(cell.contains_options(64), true);
+    assert!(cell.contains_option(64));
+    assert!(cell.contains_option(65));                              // bit 1 or 64
+    assert!(cell.contains_options(64));
     assert_eq!(cell.contains_options(65), false);                   // bit 1 and 64
   }
 
@@ -161,20 +161,20 @@ mod cell_3x3 {
     cell.set_by_option(4, SetMethod::User);                  	      // Set cell to options 4 i.e. highest of bits 1 and 4
     assert_eq!(cell.total_options_remaining, 1);
     assert_eq!(cell.symbol(), '3');
-    assert_eq!(cell.solved(), true);                                // Only 1 bit set
+    assert!(cell.solved());                                         // Only 1 bit set
     assert_eq!(cell.set_method, SetMethod::User);
 
     assert_eq!(cell.contains_option_at_position(0, 0), false);      // Only contains bit 4
-    assert_eq!(cell.contains_option_at_position(2, 0), true);
+    assert!(cell.contains_option_at_position(2, 0));
     assert_eq!(cell.contains_option_at_position(0, 2), false);
     assert_eq!(cell.contains_option(0), false);
     assert_eq!(cell.contains_option(32), false);
     assert_eq!(cell.contains_option(1), false);
-    assert_eq!(cell.contains_option(4), true);
-    assert_eq!(cell.contains_option(5), true);                      // bit 1 or 4
-    assert_eq!(cell.contains_option(7), true);                      // 1, 2 or 4
+    assert!(cell.contains_option(4));
+    assert!(cell.contains_option(5));                               // bit 1 or 4
+    assert!(cell.contains_option(7));                               // 1, 2 or 4
     assert_eq!(cell.contains_options(5), false);
-    assert_eq!(cell.contains_options(4), true);
+    assert!(cell.contains_options(4));
     assert_eq!(cell.contains_options(7), false);                    // bit 1, 2 and 4
   }
 
@@ -263,14 +263,9 @@ mod cell_3x3 {
     cell.remove_option_at_position(1, 1);                           // Continue from previous tests
     cell.remove_options(7);
 
-    let mut removed_options = Vec::with_capacity(dimensions.columns);
-
-    cell.removed_options_per_row(0, &mut removed_options);
-    assert_eq!(removed_options, [0, 1, 2]);                         // 0 0 0    - all removed from row 0
-    cell.removed_options_per_row(1, &mut removed_options);
-    assert_eq!(removed_options, [1]);                               // 1 0 1    - only 2nd option removed
-    cell.removed_options_per_row(2, &mut removed_options);
-    assert_eq!(removed_options, []);                                // 1 1 1    - no options removed
+    assert_eq!(cell.removed_options_per_row(0), [0, 1, 2]);         // 0 0 0    - all removed from row 0
+    assert_eq!(cell.removed_options_per_row(1), [1]);               // 1 0 1    - only 2nd option removed
+    assert_eq!(cell.removed_options_per_row(2), []);                // 1 1 1    - no options removed
   }
 
   #[test]
@@ -295,9 +290,7 @@ mod cell_3x3 {
     cell.remove_options(7);
 
     assert_eq!(cell.remove_options(64 + 128 + 256), false);         // Remove bottom row
-    let mut removed_options = Vec::with_capacity(dimensions.columns);
-    cell.removed_options_per_row(2, &mut removed_options);
-    assert_eq!(removed_options, [0, 1, 2]);                         // All removed
+    assert_eq!(cell.removed_options_per_row(2), [0, 1, 2]);         // All removed
 
   // 			expect(cell.json).toEqual({
 	// 				rows:
@@ -322,15 +315,13 @@ mod cell_3x3 {
     cell.remove_options(7);
     cell.remove_options(64 + 128 + 256);
 
-    assert_eq!(cell.remove_options(1 + 2 + 4 + 32), true);  		    // Only 32 removed leaving 8 - RETURNS last remaining
-    let mut removed_options = Vec::with_capacity(dimensions.columns);
-    cell.removed_options_per_row(1, &mut removed_options);
-    assert_eq!(removed_options, [1, 2]);      	                    // Only first bit in row left
+    assert!(cell.remove_options(1 + 2 + 4 + 32));  		              // Only 32 removed leaving 8 - RETURNS last remaining
+    assert_eq!(cell.removed_options_per_row(1), [1, 2]);      	    // Only first bit in row left
 	// 			assert_eq!(cell.json).toEqual({ symbol: '4' });
 
     assert_eq!(cell.total_options_remaining, 1);
-    assert_eq!(cell.contains_option_at_position(0, 1), true);
-    assert_eq!(cell.contains_option(8), true);
+    assert!(cell.contains_option_at_position(0, 1));
+    assert!(cell.contains_option(8));
     assert_eq!(cell.symbol(), '4');
   }
 
@@ -344,7 +335,7 @@ mod cell_3x3 {
     cell.remove_options(64 + 128 + 256);
     cell.remove_options(1 + 2 + 4 + 32);
 
-    assert_eq!(cell.solved(), true);
+    assert!(cell.solved());
     assert_eq!(cell.set_method, SetMethod::Calculated);
   }
 }
