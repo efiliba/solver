@@ -4,12 +4,59 @@ use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod, SYMBOLS};
 // use crate::utils::bit_utils::{highest_bit_position, number_of_bits_set, power_of_2_bit_positions};
 
 #[derive(Debug)]
+pub struct Option {
+  pub sub_grid_column: usize,
+  pub sub_grid_row: usize,
+  pub cell_column: usize,
+  pub cell_row: usize,
+  pub bits: usize
+}
+
+impl Option {
+  pub fn new(
+    sub_grid_column: usize,
+    sub_grid_row: usize,
+    cell_column: usize,
+    cell_row: usize,
+    bits: usize
+  ) -> Self {
+    Option {
+      sub_grid_column,
+      sub_grid_row,
+      cell_column,
+      cell_row,
+      bits
+    }
+  }
+}
+
+pub struct StruckOutCells {
+  pub last_options_found: Vec<Option>,
+  pub removed_options_from_column: Vec<Option>,
+  pub removed_options_from_row: Vec<Option>
+}
+
+// impl StruckOutCells {
+//   pub fn new(
+//     last_options_found: Vec<Option>,
+//     removed_options_from_column: Vec<Option>,
+//     removed_options_from_row: Vec<Option>
+//   ) -> Self {
+//     StruckOutCells {
+//       last_options_found,
+//       removed_options_from_column,
+//       removed_options_from_row
+//     }
+//   }
+// }
+
+#[derive(Debug)]
 pub struct SubGrid<'a> {
   dimensions: &'a Dimensions,
 
   pub column: usize,
   pub row: usize,
-  cells: Vec<Vec<Cell<'a>>>
+  cells: Vec<Vec<Cell<'a>>>                                         // use get(column, row) -> returns cells[row][column]
 }
 
 impl Display for SubGrid<'_> {
@@ -18,7 +65,7 @@ impl Display for SubGrid<'_> {
 
     for row in 0..self.dimensions.rows {
       for column in 0..self.dimensions.columns {
-        fmt::write(&mut output, format_args!("{}\n", self.cells[row][column]))
+        fmt::write(&mut output, format_args!("{} ", self.cells[row][column]))
           .expect("Error writing cell in sub-grid");
       }
     }
@@ -34,8 +81,9 @@ impl<'a> SubGrid<'a> {
 
     for row in 0..dimensions.rows {
       cells.push(Vec::with_capacity(dimensions.columns));
+      let swopped = dimensions.swop();
       for column in 0..dimensions.columns {
-        cells[row].push(Cell::new(dimensions, column, row));
+        cells[row].push(Cell::new(swopped, column, row));
       }
     }
   
@@ -46,783 +94,306 @@ impl<'a> SubGrid<'a> {
       cells
     }
   }
+
+  pub fn reset(&mut self) {
+    for row in 0..self.dimensions.rows {
+      self.cells.push(Vec::with_capacity(self.dimensions.columns));
+      for column in 0..self.dimensions.columns {
+        // self.cells[row][column] = Cell::new(&self.dimensions, column, row);
+        self.cells[row][column].reset();
+      }
+    }
+  }
+
+  pub fn get(&self, column: usize, row: usize) -> &Cell {
+    // grids called by [column, row] but accessed by [row][column] for efficiency
+    &self.cells[row][column]
+  }
+
+  pub fn compare(&self, items: Vec<Vec<Cell>>) -> bool {
+    let mut equal = true;
+    let mut row = self.dimensions.rows;
+    while equal && row > 0 {
+      row -= 1;
+      let mut column = self.dimensions.columns;
+      while equal && column > 0 {
+        column -= 1;
+        equal = self.cells[row][column].equal(&items[row][column]);
+      }
+    }
+
+    equal
+  }
+
+  pub fn set_by_position(
+    &mut self,
+    column: usize,
+    row: usize,
+    option_column: usize,
+    option_row: usize,
+    set_method: SetMethod
+  ) -> bool {
+    let cell = &mut self.cells[row][column];
+    if cell.set_method == SetMethod::Unset {
+      // cell unset i.e. == SetMethod.unset
+      cell.set_by_position(option_column, option_row, set_method);
+      return true;
+    }
+    false
+  }
+
+  pub fn set_by_option(
+    &mut self,
+    column: usize,
+    row: usize,
+    option: usize,
+    set_method: SetMethod
+  ) -> bool {
+    let cell = &mut self.cells[row][column];
+    if cell.set_method == SetMethod::Unset {
+      cell.set_by_option(option, set_method);
+      return true;
+    }
+    false
+  }
+
+  pub fn set_by_symbol(
+    &mut self,
+    column: usize,
+    row: usize,
+    symbol: char,
+    set_method: SetMethod
+  ) -> usize {
+    let cell = &mut self.cells[row][column];
+    if cell.set_method == SetMethod::Unset {
+      cell.set_by_symbol(symbol, set_method);
+      return cell.options;
+    }
+    0
+  }
+
+  pub fn solved(&self) -> bool {
+    let mut solved = true;
+
+    let mut row = self.dimensions.rows;
+    while solved && row > 0 {
+      row -= 1;
+      let mut column = self.dimensions.columns;
+      while solved && column > 0 {
+        column -= 1;
+        solved = self.cells[row][column].solved();
+      }
+    }
+
+    solved
+  }
+
+  // Remove option from all other cells in this sub grid - return array of last options found and options removed from all columns / rows in the sub grid
+  pub fn strike_out_cell(
+    &mut self,
+    cell_column: usize,
+    cell_row: usize,
+    option: usize
+  ) -> StruckOutCells {
+    let mut last_options: Vec<Option> = Vec::with_capacity(5);
+    let mut removed_options_from_column: Vec<Option> = Vec::with_capacity(5);
+    let mut removed_options_from_row: Vec<Option> = Vec::with_capacity(5);
+
+    let mut column;
+    let mut row = self.dimensions.rows - 1;
+    while row > cell_row {
+      column = self.dimensions.columns;
+      while column > 0 {
+        column -= 1;
+        if self.cells[row][column].remove_option(option) {
+          last_options.push(Option::new(
+            self.column,
+            self.row,
+            column,
+            row,
+            self.cells[row][column].options,
+          ));
+        } else {
+          if self.option_removed_from_column(column, row, option) {
+            removed_options_from_column.push(Option::new(
+              self.column,
+              self.row,
+              column,
+              0, // ToDo: -1,
+              option,
+            ));
+          }
+          if self.option_removed_from_row(column, row, option) {
+            removed_options_from_row.push(Option::new(
+              self.column,
+              self.row,
+              0, // ToDo: -1,
+              row,
+              option,
+            ));
+          }
+        }
+      }
+      row -= 1;
+    }
+
+    let mut column = self.dimensions.columns - 1;
+    while column > cell_column {
+      if self.cells[row][column].remove_option(option) {
+        last_options.push(Option::new(
+          self.column,
+          self.row,
+          column,
+          row,
+          self.cells[row][column].options
+        ));
+      } else {
+        if self.option_removed_from_column(column, row, option) {
+          removed_options_from_column.push(Option::new(
+            self.column,
+            self.row,
+            column,
+            0, // ToDo: -1,
+            option,
+          ));
+        }
+        if self.option_removed_from_row(column, row, option) {
+          removed_options_from_row.push(Option::new(
+            self.column,
+            self.row,
+            0, // ToDo: -1,
+            row,
+            option,
+          ));
+        }
+      }
+      column -= 1;
+    }
+
+    while column > 0 {
+      column -= 1;
+      if self.cells[row][column].remove_option(option) {
+        last_options.push(Option::new(
+            self.column,
+            self.row,
+            column,
+            row,
+            self.cells[row][column].options
+          ));
+      } else {
+        if self.option_removed_from_column(column, row, option) {
+          removed_options_from_column.push(Option::new(
+            self.column,
+            self.row,
+            column,
+            0, // ToDo: -1,
+            option,
+          ));
+        }
+        if self.option_removed_from_row(column, row, option) {
+          removed_options_from_row.push(Option::new(
+            self.column,
+            self.row,
+            0, // ToDo: -1,
+            0, // ToDo: -1,
+            option,
+          ));
+        }
+      }
+    }
+
+    while row > 0 {
+      row -= 1;
+      column = self.dimensions.columns;
+      while column > 0 {
+        column -= 1;
+        if self.cells[row][column].remove_option(option) {
+          last_options.push(Option::new(
+            self.column,
+            self.row,
+            column,
+            row,
+            self.cells[row][column].options,
+          ));
+        } else {
+          if self.option_removed_from_column(column, row, option) {
+            removed_options_from_column.push(Option::new(
+              self.column,
+              self.row,
+              column,
+              0, // ToDo: -1,
+              option,
+            ));
+          }
+          if self.option_removed_from_row(column, row, option) {
+            removed_options_from_row.push(Option::new(
+              self.column,
+              self.row,
+              0, // ToDo: -1,
+              row,
+              option,
+            ));
+          }
+        }
+      }
+    }
+
+    StruckOutCells {
+      last_options_found: last_options,
+      removed_options_from_column,
+      removed_options_from_row
+    }
+  }
+
+
+  pub fn option_removed_from_column(
+    &self,
+    cell_column: usize,
+    cell_row: usize,
+    option: usize
+  ) -> bool {
+    // Check if option removed from column
+    let mut option_found = false;
+    let mut row = self.dimensions.rows - 1;
+    while !option_found && row > cell_row {
+      option_found = (self.cells[row][cell_column].options & option) > 0;
+      row -= 1;
+    }
+    while !option_found && row > 0 {
+      row -= 1;
+      option_found = (self.cells[row][cell_column].options & option) > 0;
+    }
+
+    !option_found                                                   // If option not found then it was removed from this sub grid's column
+  }
+
+  pub fn option_removed_from_row(
+    &self,
+    cell_column: usize,
+    cell_row: usize,
+    removed_option: usize
+  ) -> bool {
+    // Check if option removed from row
+    let mut option_found = false;
+    let mut column = self.dimensions.columns - 1;
+    while !option_found && column > cell_column {
+      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
+      column -= 1;
+    }
+    while !option_found && column > 0 {
+      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
+      column -= 1;
+    }
+
+    return !option_found;                                           // If option not found then it was removed from this sub grid's row
+  }
+
+  pub fn set_cells(&self, sub_grid: Vec<Vec<Cell>>) {
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        // self.cells[row][column] = Cell::new(sub_grid[row][column]);
+      }
+    }
+  }
+
 }
-
-// pub fn reset(&mut self) {
-//     this.cells = [];
-//     for (let row = 0; row < SubGrid.rows; row++) {
-//       this.cells[row] = [];
-//       for (let column = 0; column < SubGrid.columns; column++) {
-//         this.cells[row][column] = new Cell(column, row);
-//       }
-//     }
-
-//     //            this.remainingCells = SubGrid.columns * SubGrid.rows;
-//   }
-// }
-                                                 // Track how many unset cells are left
-
-//   static Constructor(columns: number, rows: number) {
-//     Cell.Constructor(rows, columns); // Swop columns and rows
-//     SubGrid.columns = columns;
-//     SubGrid.rows = rows;
-//   }
-
-//   constructor(public column: number, public row: number) {
-//     this.reset();
-//   }
-
-
-
-// export interface IOption {
-//   subGridColumn: number;
-//   subGridRow: number;
-//   cellColumn: number;
-//   cellRow: number;
-//   bits: number;
-// }
-
-// // Arrays of last options found and options removed from all columns / rows in the sub grid
-// export interface IStruckOutCells {
-//   lastOptionsFound: IOption[];
-//   removedOptionsFromColumn: IOption[];
-//   removedOptionsFromRow: IOption[];
-// }
-
-// export type DebugSubGridType = number[][];
-
-// export interface IJsonSubGridRow {
-//   columns: IJsonCell[];
-// }
-
-// export interface IJsonSubGrid {
-//   rows?: IJsonSubGridRow[];
-// }
-
-// export interface ISubGrid {
-//   reset(): void;
-//   get(column: number, row: number): ICell;
-//   toJson(): IJsonSubGrid;
-//   setJson(json: IJsonSubGrid): void;
-//   setByPosition(
-//     column: number,
-//     row: number,
-//     optionColumn: number,
-//     optionRow: number,
-//     setMethod: SetMethod
-//   ): boolean;
-//   setByOption(
-//     column: number,
-//     row: number,
-//     option: number,
-//     setMethod: SetMethod
-//   ): boolean;
-//   setBySymbol(
-//     column: number,
-//     row: number,
-//     symbol: string,
-//     setMethod: SetMethod
-//   ): number;
-//   compare(items: ICell[][]): boolean;
-//   simplify(): void;
-//   debug(log: boolean): DebugSubGridType;
-
-//   solved(): boolean;
-//   getAvailableOptionsMatrix(): number[][];
-//   getCellsMatrix(): ICell[][];
-//   getUnsetCells(): ICell[];
-//   unsetCells(totalUnsetOptions: number): ICell[];
-//   getAvailableOptions(): number[];
-//   strikeOutCell(
-//     cellColumn: number,
-//     cellRow: number,
-//     option: number
-//   ): IStruckOutCells;
-//   isStruckOut(cellColumn: number, cellRow: number, symbol: string): boolean;
-//   removeOptionsFromColumn(cellColumn: number, options: number): IOption[];
-//   removeOptionsFromRow(cellRow: number, options: number): IOption[];
-//   removeOptionsExceptFromColumn(
-//     excludeColumn: number,
-//     options: number
-//   ): IOption[];
-//   removeOptionsExceptFromRow(excludeRow: number, options: number): IOption[];
-//   removeIfExtraOptionsFromColumn(column: number, options: number): IOption[];
-//   removeIfExtraOptionsFromRow(row: number, options: number): IOption[];
-//   removeIfExtraOptions(options: number): IOption[];
-//   optionExistsInColumn(column: number, option: number): boolean;
-//   optionExistsInRow(row: number, option: number): boolean;
-//   optionRemovedFromColumn(
-//     cellColumn: number,
-//     cellRow: number,
-//     option: number
-//   ): boolean;
-//   optionRemovedFromRow(
-//     cellColumn: number,
-//     cellRow: number,
-//     removedOption: number
-//   ): boolean;
-//   setCells(subGrid: ICell[][]): void;
-// }
-
-// export class SubGrid implements ISubGrid {
-//   private static columns: number;
-//   private static rows: number;
-
-//   private cells: ICell[][]; // Jagged array used for efficiency ???
-//   //        private remainingCells: number;                                                             // Track how many unset cells are left
-
-//   static Constructor(columns: number, rows: number) {
-//     Cell.Constructor(rows, columns); // Swop columns and rows
-//     SubGrid.columns = columns;
-//     SubGrid.rows = rows;
-//   }
-
-//   constructor(public column: number, public row: number) {
-//     this.reset();
-//   }
-
-//   public reset() {
-//     this.cells = [];
-//     for (let row = 0; row < SubGrid.rows; row++) {
-//       this.cells[row] = [];
-//       for (let column = 0; column < SubGrid.columns; column++) {
-//         this.cells[row][column] = new Cell(column, row);
-//       }
-//     }
-
-//     //            this.remainingCells = SubGrid.columns * SubGrid.rows;
-//   }
-
-//   public get(column: number, row: number): ICell {
-//     // grids called by [column, row] but accessed by [row][column] for efficiency
-//     return this.cells[row][column];
-//   }
-
-//   public toJson(): IJsonSubGrid {
-//     const json: IJsonSubGrid = { rows: [] };
-//     for (let row = 0; row < SubGrid.rows; row++) {
-//       const jsonCells: IJsonCell[] = [];
-//       for (let column = 0; column < SubGrid.columns; column++) {
-//         jsonCells.push(this.cells[row][column].json);
-//       }
-//       json.rows.push({ columns: jsonCells });
-//     }
-
-//     return json;
-//   }
-
-//   public setJson(json: IJsonSubGrid) {
-//     //            this.remainingCells = SubGrid.columns * SubGrid.rows;
-
-//     for (let row = 0; row < json.rows.length; row++) {
-//       const columns: IJsonCell[] = json.rows[row].columns;
-//       for (let column = 0; column < columns.length; column++) {
-//         this.cells[row][column].setJson(columns[column]);
-//         //                    if (this.cells[row][column].isSet)
-//         //                        this.remainingCells--;
-//       }
-//     }
-//   }
-
-//   public setByPosition(
-//     column: number,
-//     row: number,
-//     optionColumn: number,
-//     optionRow: number,
-//     setMethod: SetMethod
-//   ): boolean {
-//     const cell: ICell = this.cells[row][column];
-//     if (!cell.setMethod) {
-//       // cell unset i.e. == SetMethod.unset
-//       cell.setByPosition(optionColumn, optionRow, setMethod);
-//       return true;
-//       //                this.remainingCells--;
-//     } else {
-//       return false;
-//     }
-//   }
-
-//   public setByOption(
-//     column: number,
-//     row: number,
-//     option: number,
-//     setMethod: SetMethod
-//   ): boolean {
-//     const cell: ICell = this.cells[row][column];
-//     if (!cell.setMethod) {
-//       cell.setByOption(option, setMethod);
-//       return true;
-//       //                this.remainingCells--;
-//     } else {
-//       return false;
-//     }
-//   }
-
-//   public setBySymbol(
-//     column: number,
-//     row: number,
-//     symbol: string,
-//     setMethod: SetMethod
-//   ): number {
-//     const cell: ICell = this.cells[row][column];
-//     if (!cell.setMethod) {
-//       // cell unset i.e. == SetMethod.unset
-//       cell.setBySymbol(symbol, setMethod);
-//       return cell.options;
-//       //                this.remainingCells--;
-//     } else {
-//       return 0;
-//     }
-//   }
-
-//   public compare(items: ICell[][]): boolean {
-//     let match: boolean = true;
-//     let row: number = SubGrid.rows;
-//     while (match && row--) {
-//       let column: number = SubGrid.columns;
-//       while (match && column--) {
-//         match = this.cells[row][column].equal(items[row][column]);
-//       }
-//     }
-
-//     return match;
-//   }
-
-//   public simplify() {
-//     let changed: boolean = true;
-//     while (changed /*&& this.remainingCells > 0*/) {
-//       changed = false;
-
-//       let row: number = SubGrid.rows;
-//       while (!changed && row--) {
-//         let column: number = SubGrid.columns;
-//         while (!changed && column--) {
-//           changed =
-//             this.cells[row][column].setMethod != null &&
-//             this.removeIfExtraOptions(this.cells[row][column].options).length >
-//               0; // cell set i.e. != SetMethod.unset
-//         }
-//       }
-//     }
-//   }
-
-//   public debug(log: boolean = true): DebugSubGridType {
-//     const rows: DebugSubGridType = [];
-
-//     let row: number = SubGrid.rows;
-//     while (row--) {
-//       let column: number = SubGrid.columns;
-//       const optionsRow: number[] = [];
-//       while (column--) {
-//         optionsRow.unshift(this.cells[row][column].options);
-//       }
-//       rows.unshift(optionsRow);
-//     }
-
-//     if (log) {
-//       while (++row < SubGrid.rows) {
-//         console.log(rows[row].join(" | "));
-//       }
-//       console.log(Array(rows[0].length + 1).join("---"));
-//     }
-
-//     return rows;
-//   }
-
-//   public solved(): boolean {
-//     let solved: boolean = true;
-
-//     let row = SubGrid.rows;
-//     while (solved && row--) {
-//       let column = SubGrid.columns;
-//       while (solved && column--) {
-//         solved = this.cells[row][column].solved();
-//       }
-//     }
-
-//     return solved;
-//     //return !this.remainingCells;
-//   }
-
-//   public getAvailableOptionsMatrix(): number[][] {
-//     const matrix: number[][] = [];
-
-//     let row = SubGrid.rows;
-//     while (row--) {
-//       matrix[row] = [];
-//       let column = SubGrid.columns;
-//       while (column--) {
-//         matrix[row][column] = this.cells[row][column].options;
-//       }
-//     }
-
-//     return matrix;
-//   }
-
-//   public getCellsMatrix(): ICell[][] {
-//     const matrix: ICell[][] = [];
-
-//     let row = SubGrid.rows;
-//     while (row--) {
-//       matrix[row] = [];
-//       let column = SubGrid.columns;
-//       while (column--) {
-//         matrix[row][column] = new Cell(this.cells[row][column]);
-//       }
-//     }
-
-//     return matrix;
-//   }
-
-//   public getUnsetCells(): ICell[] {
-//     const unsetCells: ICell[] = [];
-
-//     for (let row = 0; row < SubGrid.rows; row++) {
-//       for (let column = 0; column < SubGrid.columns; column++) {
-//         if (!this.cells[row][column].setMethod) {
-//           // cell unset i.e. == SetMethod.unset
-//           unsetCells.push(new Cell(this.cells[row][column])); // Set copy of cell
-//         }
-//       }
-//     }
-//     return unsetCells;
-//   }
-
-//   public unsetCells(totalUnsetOptions: number): ICell[] {
-//     const cells: ICell[] = this.getUnsetCells();
-//     const unset: ICell[] = [];
-//     for (let index = 0; index < cells.length; index++) {
-//       if (cells[index].totalOptionsRemaining === totalUnsetOptions) {
-//         unset.push(cells[index]);
-//       }
-//     }
-
-//     return unset;
-//   }
-
-//   public getAvailableOptions(): number[] {
-//     const array: number[] = [];
-
-//     let row: number = SubGrid.rows;
-//     while (row--) {
-//       let column: number = SubGrid.columns;
-//       while (column--) {
-//         array[row * SubGrid.columns + column] = this.cells[row][column].options;
-//       }
-//     }
-
-//     return array;
-//   }
-
-//   // Remove option from all other cells in this sub grid - return array of last options found and options removed from all columns / rows in the sub grid
-//   public strikeOutCell(
-//     cellColumn: number,
-//     cellRow: number,
-//     option: number
-//   ): IStruckOutCells {
-//     const lastOptions: IOption[] = [];
-//     const removedOptionsFromColumn: IOption[] = [];
-//     const removedOptionsFromRow: IOption[] = [];
-
-//     let column: number;
-//     let row: number = SubGrid.rows;
-//     while (--row > cellRow) {
-//       column = SubGrid.columns;
-//       while (column--) {
-//         if (this.cells[row][column].removeOption(option)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//         } else {
-//           if (this.optionRemovedFromColumn(column, row, option)) {
-//             removedOptionsFromColumn.push({
-//               subGridColumn: this.column,
-//               subGridRow: this.row,
-//               cellColumn: column,
-//               cellRow: -1,
-//               bits: option,
-//             });
-//           }
-//           if (this.optionRemovedFromRow(column, row, option)) {
-//             removedOptionsFromRow.push({
-//               subGridColumn: this.column,
-//               subGridRow: this.row,
-//               cellColumn: -1,
-//               cellRow: row,
-//               bits: option,
-//             });
-//           }
-//         }
-//       }
-//     }
-
-//     column = SubGrid.columns;
-//     while (--column > cellColumn) {
-//       if (this.cells[row][column].removeOption(option)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: column,
-//           cellRow: row,
-//           bits: this.cells[row][column].options,
-//         });
-//       } else {
-//         if (this.optionRemovedFromColumn(column, row, option)) {
-//           removedOptionsFromColumn.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: -1,
-//             bits: option,
-//           });
-//         }
-//         if (this.optionRemovedFromRow(column, row, option)) {
-//           removedOptionsFromRow.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: -1,
-//             cellRow: row,
-//             bits: option,
-//           });
-//         }
-//       }
-//     }
-
-//     while (column--) {
-//       if (this.cells[row][column].removeOption(option)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: column,
-//           cellRow: row,
-//           bits: this.cells[row][column].options,
-//         });
-//       } else {
-//         if (this.optionRemovedFromColumn(column, row, option)) {
-//           removedOptionsFromColumn.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: -1,
-//             bits: option,
-//           });
-//         }
-//         if (this.optionRemovedFromRow(column, row, option)) {
-//           removedOptionsFromRow.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: -1,
-//             cellRow: -1,
-//             bits: option,
-//           });
-//         }
-//       }
-//     }
-
-//     while (row--) {
-//       column = SubGrid.columns;
-//       while (column--) {
-//         if (this.cells[row][column].removeOption(option)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//         } else {
-//           if (this.optionRemovedFromColumn(column, row, option)) {
-//             removedOptionsFromColumn.push({
-//               subGridColumn: this.column,
-//               subGridRow: this.row,
-//               cellColumn: column,
-//               cellRow: -1,
-//               bits: option,
-//             });
-//           }
-//           if (this.optionRemovedFromRow(column, row, option)) {
-//             removedOptionsFromRow.push({
-//               subGridColumn: this.column,
-//               subGridRow: this.row,
-//               cellColumn: -1,
-//               cellRow: row,
-//               bits: option,
-//             });
-//           }
-//         }
-//       }
-//     }
-
-//     return {
-//       lastOptionsFound: lastOptions,
-//       removedOptionsFromColumn: removedOptionsFromColumn,
-//       removedOptionsFromRow: removedOptionsFromRow,
-//     };
-//   }
-
-//   public isStruckOut(
-//     cellColumn: number,
-//     cellRow: number,
-//     symbol: string
-//   ): boolean {
-//     return !this.cells[cellRow][cellColumn].containsSymbol(symbol);
-//   }
-
-//   public removeOptionsFromColumn(
-//     cellColumn: number,
-//     options: number
-//   ): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     for (let row: number = 0; row < SubGrid.rows; row++) {
-//       if (this.cells[row][cellColumn].removeOptions(options)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: cellColumn,
-//           cellRow: row,
-//           bits: this.cells[row][cellColumn].options,
-//         });
-//         //                    this.remainingCells--;
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeOptionsFromRow(cellRow: number, options: number): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     for (let column: number = 0; column < SubGrid.columns; column++) {
-//       if (this.cells[cellRow][column].removeOptions(options)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: column,
-//           cellRow: cellRow,
-//           bits: this.cells[cellRow][column].options,
-//         });
-//         //                    this.remainingCells--;
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeOptionsExceptFromColumn(
-//     excludeColumn: number,
-//     options: number
-//   ): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     let row: number;
-//     let column: number = SubGrid.columns;
-//     while (--column > excludeColumn) {
-//       row = SubGrid.rows;
-//       while (row--) {
-//         if (this.cells[row][column].removeOptions(options)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//           //                        this.remainingCells--;
-//         }
-//       }
-//     }
-
-//     while (column--) {
-//       row = SubGrid.rows;
-//       while (row--) {
-//         if (this.cells[row][column].removeOptions(options)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//           //                        this.remainingCells--;
-//         }
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeOptionsExceptFromRow(
-//     excludeRow: number,
-//     options: number
-//   ): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     let column: number;
-//     let row: number = SubGrid.rows;
-//     while (--row > excludeRow) {
-//       column = SubGrid.columns;
-//       while (column--) {
-//         if (this.cells[row][column].removeOptions(options)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//           //                        this.remainingCells--;
-//         }
-//       }
-//     }
-
-//     while (row--) {
-//       column = SubGrid.columns;
-//       while (column--) {
-//         if (this.cells[row][column].removeOptions(options)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//           //                        this.remainingCells--;
-//         }
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeIfExtraOptionsFromColumn(
-//     column: number,
-//     options: number
-//   ): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     for (let row: number = 0; row < SubGrid.rows; row++) {
-//       if (this.cells[row][column].removeOptions(options)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: column,
-//           cellRow: row,
-//           bits: this.cells[row][column].options,
-//         });
-//         //                    this.remainingCells--;
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeIfExtraOptionsFromRow(row: number, options: number): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     for (let column: number = 0; column < SubGrid.columns; column++) {
-//       if (this.cells[row][column].removeOptions(options)) {
-//         lastOptions.push({
-//           subGridColumn: this.column,
-//           subGridRow: this.row,
-//           cellColumn: column,
-//           cellRow: row,
-//           bits: this.cells[row][column].options,
-//         });
-//         //                    this.remainingCells--;
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public removeIfExtraOptions(options: number): IOption[] {
-//     const lastOptions: IOption[] = [];
-
-//     for (let row: number = 0; row < SubGrid.rows; row++) {
-//       for (let column: number = 0; column < SubGrid.columns; column++) {
-//         if (this.cells[row][column].removeOptions(options)) {
-//           lastOptions.push({
-//             subGridColumn: this.column,
-//             subGridRow: this.row,
-//             cellColumn: column,
-//             cellRow: row,
-//             bits: this.cells[row][column].options,
-//           });
-//           //                        this.remainingCells--;
-//         }
-//       }
-//     }
-
-//     return lastOptions;
-//   }
-
-//   public optionExistsInColumn(column: number, option: number): boolean {
-//     let found: boolean = false;
-//     let row: number = SubGrid.rows;
-//     while (!found && row--) {
-//       found = this.cells[row][column].containsOption(option);
-//     }
-
-//     return found;
-//   }
-
-//   public optionExistsInRow(row: number, option: number): boolean {
-//     let found: boolean = false;
-//     let column: number = SubGrid.columns;
-//     while (!found && column-- > 0) {
-//       found = this.cells[row][column].containsOption(option);
-//     }
-
-//     return found;
-//   }
-
-//   public optionRemovedFromColumn(
-//     cellColumn: number,
-//     cellRow: number,
-//     option: number
-//   ): boolean {
-//     // Check if option removed from column
-//     let optionFound: boolean = false;
-
-//     let row: number = SubGrid.rows;
-//     while (!optionFound && --row > cellRow) {
-//       optionFound = (this.cells[row][cellColumn].options & option) > 0;
-//     }
-//     while (!optionFound && row--) {
-//       optionFound = (this.cells[row][cellColumn].options & option) > 0;
-//     }
-
-//     return !optionFound; // If option not found then it was removed from this sub grid's column
-//   }
-
-//   public optionRemovedFromRow(
-//     cellColumn: number,
-//     cellRow: number,
-//     removedOption: number
-//   ): boolean {
-//     // Check if option removed from row
-//     let optionFound: boolean = false;
-//     let column: number = SubGrid.columns;
-//     while (!optionFound && --column > cellColumn) {
-//       optionFound = (this.cells[cellRow][column].options & removedOption) > 0;
-//     }
-//     while (!optionFound && column--) {
-//       optionFound = (this.cells[cellRow][column].options & removedOption) > 0;
-//     }
-
-//     return !optionFound; // If option not found then it was removed from this sub grid's row
-//   }
-
-//   public setCells(subGrid: ICell[][]) {
-//     for (let row: number = 0; row < SubGrid.rows; row++) {
-//       for (let column: number = 0; column < SubGrid.columns; column++) {
-//         this.cells[row][column] = new Cell(subGrid[row][column]);
-//       }
-//     }
-//   }
-// }

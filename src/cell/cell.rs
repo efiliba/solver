@@ -77,6 +77,12 @@ impl<'a> Cell<'a> {
     // }
   }
 
+  pub fn equal(&self, cell: &Cell) -> bool {
+      // (self.set_column == cell.set_column || cell.set_column == -1) &&
+    // self.set_column == cell.set_column && self.set_row == cell.set_row && self.options == cell.options
+    self.options == cell.options
+  }
+
   pub fn solved(&self) -> bool {
     self.total_options_remaining == 1
   }
