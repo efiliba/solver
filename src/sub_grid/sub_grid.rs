@@ -1,54 +1,6 @@
 use std::fmt::{self, Display};
 use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod, SYMBOLS};
-
-// use crate::utils::bit_utils::{highest_bit_position, number_of_bits_set, power_of_2_bit_positions};
-
-#[derive(Debug)]
-pub struct Option {
-  pub sub_grid_column: usize,
-  pub sub_grid_row: usize,
-  pub cell_column: usize,
-  pub cell_row: usize,
-  pub bits: usize
-}
-
-impl Option {
-  pub fn new(
-    sub_grid_column: usize,
-    sub_grid_row: usize,
-    cell_column: usize,
-    cell_row: usize,
-    bits: usize
-  ) -> Self {
-    Option {
-      sub_grid_column,
-      sub_grid_row,
-      cell_column,
-      cell_row,
-      bits
-    }
-  }
-}
-
-pub struct StruckOutCells {
-  pub last_options_found: Vec<Option>,
-  pub removed_options_from_column: Vec<Option>,
-  pub removed_options_from_row: Vec<Option>
-}
-
-// impl StruckOutCells {
-//   pub fn new(
-//     last_options_found: Vec<Option>,
-//     removed_options_from_column: Vec<Option>,
-//     removed_options_from_row: Vec<Option>
-//   ) -> Self {
-//     StruckOutCells {
-//       last_options_found,
-//       removed_options_from_column,
-//       removed_options_from_row
-//     }
-//   }
-// }
+use crate::sub_grid::{Option, StruckOutCells};
 
 #[derive(Debug)]
 pub struct SubGrid<'a> {
@@ -88,7 +40,6 @@ impl Display for SubGrid<'_> {
     write!(f, "{}", output)
   }
 }
-
 
 impl<'a> SubGrid<'a> {
   pub fn new(dimensions: &'a Dimensions, column: usize, row: usize) -> Self {
@@ -210,9 +161,9 @@ impl<'a> SubGrid<'a> {
     cell_row: usize,
     option: usize
   ) -> StruckOutCells {
-    let mut last_options: Vec<Option> = Vec::with_capacity(5);
-    let mut removed_options_from_column: Vec<Option> = Vec::with_capacity(5);
-    let mut removed_options_from_row: Vec<Option> = Vec::with_capacity(5);
+    let mut last_options: Vec<Option> = Vec::new();
+    let mut removed_options_from_column: Vec<Option> = Vec::new();
+    let mut removed_options_from_row: Vec<Option> = Vec::new();
 
     let mut column;
     let mut row = self.dimensions.rows - 1;
@@ -221,31 +172,31 @@ impl<'a> SubGrid<'a> {
       while column > 0 {
         column -= 1;
         if self.cells[row][column].remove_option(option) {
-          last_options.push(Option::new(
-            self.column,
-            self.row,
-            column,
-            row,
-            self.cells[row][column].options,
-          ));
+          last_options.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: column,
+            cell_row: row,
+            bits: self.cells[row][column].options
+          });
         } else {
           if self.option_removed_from_column(column, row, option) {
-            removed_options_from_column.push(Option::new(
-              self.column,
-              self.row,
-              column,
-              0, // ToDo: -1,
-              option,
-            ));
+            removed_options_from_column.push(Option {
+              sub_grid_column: self.column,
+              sub_grid_row: self.row,
+              cell_column: column,
+              cell_row: 0, // ToDo: -1,
+              bits: option
+            });
           }
           if self.option_removed_from_row(column, row, option) {
-            removed_options_from_row.push(Option::new(
-              self.column,
-              self.row,
-              0, // ToDo: -1,
-              row,
-              option,
-            ));
+            removed_options_from_row.push(Option {
+              sub_grid_column: self.column,
+              sub_grid_row: self.row,
+              cell_column: 0, // ToDo: -1,
+              cell_row: row,
+              bits: option
+            });
           }
         }
       }
@@ -255,31 +206,31 @@ impl<'a> SubGrid<'a> {
     let mut column = self.dimensions.columns - 1;
     while column > cell_column {
       if self.cells[row][column].remove_option(option) {
-        last_options.push(Option::new(
-          self.column,
-          self.row,
-          column,
-          row,
-          self.cells[row][column].options
-        ));
+        last_options.push(Option {
+          sub_grid_column: self.column,
+          sub_grid_row: self.row,
+          cell_column: column,
+          cell_row: row,
+          bits: self.cells[row][column].options
+        });
       } else {
         if self.option_removed_from_column(column, row, option) {
-          removed_options_from_column.push(Option::new(
-            self.column,
-            self.row,
-            column,
-            0, // ToDo: -1,
-            option,
-          ));
+          removed_options_from_column.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: column,
+            cell_row: 0, // ToDo: -1,
+            bits: option
+          });
         }
         if self.option_removed_from_row(column, row, option) {
-          removed_options_from_row.push(Option::new(
-            self.column,
-            self.row,
-            0, // ToDo: -1,
-            row,
-            option,
-          ));
+          removed_options_from_row.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: 0, // ToDo: -1,
+            cell_row: row,
+            bits: option
+          });
         }
       }
       column -= 1;
@@ -288,31 +239,31 @@ impl<'a> SubGrid<'a> {
     while column > 0 {
       column -= 1;
       if self.cells[row][column].remove_option(option) {
-        last_options.push(Option::new(
-            self.column,
-            self.row,
-            column,
-            row,
-            self.cells[row][column].options
-          ));
+        last_options.push(Option {
+          sub_grid_column: self.column,
+          sub_grid_row: self.row,
+          cell_column: column,
+          cell_row: row,
+          bits: self.cells[row][column].options
+        });
       } else {
         if self.option_removed_from_column(column, row, option) {
-          removed_options_from_column.push(Option::new(
-            self.column,
-            self.row,
-            column,
-            0, // ToDo: -1,
-            option,
-          ));
+          removed_options_from_column.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: column,
+            cell_row: 0, // ToDo: -1,
+            bits: option
+          });
         }
         if self.option_removed_from_row(column, row, option) {
-          removed_options_from_row.push(Option::new(
-            self.column,
-            self.row,
-            0, // ToDo: -1,
-            0, // ToDo: -1,
-            option,
-          ));
+          removed_options_from_row.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: 0, // ToDo: -1,
+            cell_row: 0, // ToDo: -1,
+            bits: option
+          });
         }
       }
     }
@@ -323,31 +274,31 @@ impl<'a> SubGrid<'a> {
       while column > 0 {
         column -= 1;
         if self.cells[row][column].remove_option(option) {
-          last_options.push(Option::new(
-            self.column,
-            self.row,
-            column,
-            row,
-            self.cells[row][column].options,
-          ));
+          last_options.push(Option {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: column,
+            cell_row: row,
+            bits: self.cells[row][column].options
+          });
         } else {
           if self.option_removed_from_column(column, row, option) {
-            removed_options_from_column.push(Option::new(
-              self.column,
-              self.row,
-              column,
-              0, // ToDo: -1,
-              option,
-            ));
+            removed_options_from_column.push(Option {
+              sub_grid_column: self.column,
+              sub_grid_row: self.row,
+              cell_column: column,
+              cell_row: 0, // ToDo: -1,
+              bits: option
+            });
           }
           if self.option_removed_from_row(column, row, option) {
-            removed_options_from_row.push(Option::new(
-              self.column,
-              self.row,
-              0, // ToDo: -1,
-              row,
-              option,
-            ));
+            removed_options_from_row.push(Option {
+              sub_grid_column: self.column,
+              sub_grid_row: self.row,
+              cell_column: 0, // ToDo: -1,
+              cell_row: row,
+              bits: option
+            });
           }
         }
       }

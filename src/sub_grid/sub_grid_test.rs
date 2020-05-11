@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod sub_grid_2x4 {
   use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod};
-  use crate::sub_grid::SubGrid;
+  use crate::sub_grid::sub_grid::SubGrid;
 
   fn init_cells(dimensions: &Dimensions) -> Vec<Vec<Cell>> {
     let mut cells: Vec<Vec<Cell>> = Vec::with_capacity(dimensions.total);
@@ -139,13 +139,6 @@ mod sub_grid_2x4 {
     expected_cells[test_row][test_column].reset();                  // No options removed
     assert!(sub_grid.compare(expected_cells));
   }
-
-
-
-
-
-
-
     
   #[test]
   fn it_removes_16_from_all_cells_except_bottom_middle() {
@@ -163,10 +156,5 @@ mod sub_grid_2x4 {
     // assert_eq!(last_options[0].cell_column, 2);                     // (2, 1) must be 6
     // assert_eq!(last_options[0].cell_row, 1);
     // assert_eq!(last_options[0].bits, 32);
-
   }
-      
-
-
-
 }
