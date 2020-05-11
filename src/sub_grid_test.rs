@@ -5,10 +5,11 @@ mod sub_grid_2x4 {
 
   fn init_cells(dimensions: &Dimensions) -> Vec<Vec<Cell>> {
     let mut cells: Vec<Vec<Cell>> = Vec::with_capacity(dimensions.total);
+    let swopped = dimensions.swop();
     for row in 0..dimensions.rows {
       cells.push(Vec::with_capacity(dimensions.columns));
       for column in 0..dimensions.columns {
-        cells[row].push(Cell::new(dimensions, column, row));
+        cells[row].push(Cell::new(swopped, column, row));
       }
     }
 
@@ -48,7 +49,7 @@ mod sub_grid_2x4 {
   }
 
   #[test]
-  fn it_solves_4x2_sub_grid() {
+  fn it_solves_the_4x2_sub_grid() {
     let dimensions = Dimensions::new(4, 2);
     let mut sub_grid = SubGrid::new(&dimensions, 1, 3);
 
@@ -65,7 +66,7 @@ mod sub_grid_2x4 {
   }
 
   #[test]
-  fn it_removes_1_from_all_cells_except_top_left() {
+  fn it_removes_1_from_all_cells_except_top_left_in_3x2_sub_grid() {
     let dimensions = Dimensions::new(3, 2);
     let mut sub_grid = SubGrid::new(&dimensions, 0, 0);
 
@@ -77,15 +78,15 @@ mod sub_grid_2x4 {
     let struck_out_cells = sub_grid.strike_out_cell(test_column, test_row, remove_bit);
     assert_eq!(struck_out_cells.last_options_found.len(), 0);       // No last options found
   
-    let remove_from_column = struck_out_cells.removed_options_from_column;  // Remove 1 from columns 2 and 1
+    let remove_from_column = struck_out_cells.removed_options_from_column;  // Removed 1 from columns 2 and 1
     assert_eq!(remove_from_column.len(), 2);
     assert_eq!(remove_from_column[0].cell_column, 2);
     assert_eq!(remove_from_column[0].bits, remove_bit);
     assert_eq!(remove_from_column[1].cell_column, 1);
     assert_eq!(remove_from_column[1].bits, remove_bit);
 
-    let remove_from_row = struck_out_cells.removed_options_from_row;// Remove 1 from row 1
-    // assert_eq!(remove_from_row.len(), 1);  // ToDo: uncomment
+    let remove_from_row = struck_out_cells.removed_options_from_row;// Removed 1 from row 1
+    assert_eq!(remove_from_row.len(), 1);
     assert_eq!(remove_from_row[0].cell_row, remove_bit);
     assert_eq!(remove_from_column[0].bits, remove_bit);
 
@@ -105,7 +106,9 @@ mod sub_grid_2x4 {
     let dimensions = Dimensions::new(3, 2);
     let mut sub_grid = SubGrid::new(&dimensions, 0, 0);
 
-    // Remove 1 from all cells except top left cell - check 1 removed from other cells
+    sub_grid.strike_out_cell(0, 0, 1);                              // Continue from previous test
+
+    // Remove 2 from all cells except top left cell - check 2 removed from other cells
     let remove_bit = 2;
     let test_column = 0;
     let test_row = 0;
@@ -113,15 +116,15 @@ mod sub_grid_2x4 {
     let struck_out_cells = sub_grid.strike_out_cell(test_column, test_row, remove_bit);
     assert_eq!(struck_out_cells.last_options_found.len(), 0);       // No last options found
     
-    let remove_from_column = struck_out_cells.removed_options_from_column;  // Remove 2 from columns 2 and 0
+    let remove_from_column = struck_out_cells.removed_options_from_column;  // Removed 2 from columns 2 and 1
     assert_eq!(remove_from_column.len(), 2);
     assert_eq!(remove_from_column[0].cell_column, 2);
     assert_eq!(remove_from_column[0].bits, remove_bit);
-    // assert_eq!(remove_from_column[1].cell_column, 0);
+    assert_eq!(remove_from_column[1].cell_column, 1);
     assert_eq!(remove_from_column[1].bits, remove_bit);
     
-    let remove_from_row = struck_out_cells.removed_options_from_row;   // Remove 2 from row 1
-    // assert_eq!(remove_from_row.len(), 1);  // ToDo: uncomment
+    let remove_from_row = struck_out_cells.removed_options_from_row;  // Removed 2 from row 1
+    assert_eq!(remove_from_row.len(), 1);
     assert_eq!(remove_from_row[0].cell_row, 1);
     assert_eq!(remove_from_column[0].bits, remove_bit);
 
@@ -129,24 +132,12 @@ mod sub_grid_2x4 {
       
     for row in 0..dimensions.rows {
       for column in 0..dimensions.columns {
+        expected_cells[row][column].remove_option(1);               // Continue from previous test
         expected_cells[row][column].remove_option(remove_bit);
       }
     }
     expected_cells[test_row][test_column].reset();                  // No options removed
-    expected_cells[test_row][test_column].remove_option(1);				  // Remove previous bit
     assert!(sub_grid.compare(expected_cells));
-
-    		// 	for (let row: number = 0; row < rows; row++) {
-		// 		for (let column: number = 0; column < columns; column++) {
-		// 			expectedCells[row][column].removeOption(removeBit);
-		// 		}
-		// 	}
-		// 	expectedCells[testRow][testColumn].reset();
-		// 	expectedCells[testRow][testColumn].removeOption(1);						// Remove previous bit
-		// 	expect(subGrid.compare(expectedCells)).toBe(true);
-    // });
-
-
   }
 
 

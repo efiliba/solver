@@ -59,16 +59,31 @@ pub struct SubGrid<'a> {
   cells: Vec<Vec<Cell<'a>>>                                         // use get(column, row) -> returns cells[row][column]
 }
 
+
 impl Display for SubGrid<'_> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn add_separator_line(output: &mut String, dimensions: &Dimensions) {
+      // All left aligned padding '-' to ''
+      fmt::write(output, format_args!("{:-<1$}", "", (dimensions.total + 1) * dimensions.columns - 1))
+        .expect("Error adding separator line in sub-grid");
+    }
+
+    fn add_new_line(output: &mut String) {
+      fmt::write(output, format_args!("\n")).expect("Error adding new line in sub-grid");
+    }
+
     let mut output = String::new();
+    add_separator_line(&mut output, self.dimensions);
+    add_new_line(&mut output);
 
     for row in 0..self.dimensions.rows {
       for column in 0..self.dimensions.columns {
         fmt::write(&mut output, format_args!("{} ", self.cells[row][column]))
           .expect("Error writing cell in sub-grid");
       }
+      add_new_line(&mut output);
     }
+    add_separator_line(&mut output, self.dimensions);
 
     write!(f, "{}", output)
   }
@@ -345,7 +360,6 @@ impl<'a> SubGrid<'a> {
     }
   }
 
-
   pub fn option_removed_from_column(
     &self,
     cell_column: usize,
@@ -354,11 +368,13 @@ impl<'a> SubGrid<'a> {
   ) -> bool {
     // Check if option removed from column
     let mut option_found = false;
-    let mut row = self.dimensions.rows - 1;
-    while !option_found && row > cell_row {
-      option_found = (self.cells[row][cell_column].options & option) > 0;
+    let mut row = self.dimensions.rows;
+    while !option_found && row > cell_row + 1 {
       row -= 1;
+      option_found = (self.cells[row][cell_column].options & option) > 0;
     }
+
+    row -= 1;                                                       // Skip row_column
     while !option_found && row > 0 {
       row -= 1;
       option_found = (self.cells[row][cell_column].options & option) > 0;
@@ -375,14 +391,16 @@ impl<'a> SubGrid<'a> {
   ) -> bool {
     // Check if option removed from row
     let mut option_found = false;
-    let mut column = self.dimensions.columns - 1;
-    while !option_found && column > cell_column {
-      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
+    let mut column = self.dimensions.columns;
+    while !option_found && column > cell_column + 1 {
       column -= 1;
+      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
     }
+    
+    column -= 1;                                                    // Skip cell_column
     while !option_found && column > 0 {
-      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
       column -= 1;
+      option_found = (self.cells[cell_row][column].options & removed_option) > 0;
     }
 
     return !option_found;                                           // If option not found then it was removed from this sub grid's row
@@ -391,9 +409,8 @@ impl<'a> SubGrid<'a> {
   pub fn set_cells(&self, sub_grid: Vec<Vec<Cell>>) {
     for row in 0..self.dimensions.rows {
       for column in 0..self.dimensions.columns {
-        // self.cells[row][column] = Cell::new(sub_grid[row][column]);
+        // self.cells[row][column] = Cell::new(sub_grid[row][column]); -> set using copy constructor ?
       }
     }
   }
-
 }
