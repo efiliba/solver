@@ -3,7 +3,7 @@ extern crate solver;
 // use solver::utils::{bit_utils, combinations::Combinations};
 use solver::cell::cell::Cell2;
 use solver::cell::{cell::Cell, dimensions::Dimensions};
-use solver::sub_grid::SubGrid;
+use solver::sub_grid::sub_grid::SubGrid;
 
 // use solver::utils::bit_utils::highest_bit_position;
 
@@ -14,31 +14,31 @@ fn main() {
   // cell::test();
   println!("======================================");
 
-  let dimensions = &Dimensions::new(2, 2);
+  // let dimensions = Dimensions::new(2, 2);
 
-  let subgid = SubGrid::new(dimensions, 0, 0);
-  println!("***  subgid **** \n{}", subgid);
+  // let subgid = SubGrid::new(&dimensions, 0, 0);
+  // println!("***  subgid **** \n{}", subgid);
 
-  let mut cell2 = Cell2::new(1, 1);
-  match cell2 {
-    Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
-    Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
-  };
+  // let mut cell2 = Cell2::new(1, 1);
+  // match cell2 {
+  //   Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
+  //   Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
+  // };
 
-  cell2.change();
-  match cell2 {
-    Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
-    Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
-  };
+  // cell2.change();
+  // match cell2 {
+  //   Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
+  //   Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
+  // };
 
-  println!("======================================\n");
+  // println!("======================================\n");
 
 
-  let mut cell = Cell::new(dimensions, 0, 0);
-  // println!("options: {}", cell.options);
+  // let mut cell = Cell::new(dimensions, 0, 0);
+  // // println!("options: {}", cell.options);
 
-  cell.remove_option(1);
-  println!("cell {}", cell);
+  // cell.remove_option(1);
+  // println!("cell {}", cell);
 
   // cell.reset();
   // cell.test();
