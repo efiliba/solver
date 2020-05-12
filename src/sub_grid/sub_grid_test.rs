@@ -29,7 +29,7 @@ mod sub_grid {
 
     // Ensure a 2 x 4 sub grid created
     let expected_cells = super::init_cells(&dimensions);
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 
   #[test]
@@ -40,7 +40,7 @@ mod sub_grid {
     let sub_grid = SubGrid::new(&dimensions, 1, 3);                 // Bottom right Cell of parent grid          
 
     let expected_cells = super::init_cells(&dimensions);
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
 
     assert_eq!(sub_grid.get(0, 0).options, 255);
     assert_eq!(sub_grid.get(1, 0).options, 255);
@@ -110,7 +110,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     }
     expected_cells[test_row][test_column].reset();                  // No options removed
   
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
     
   #[test]
@@ -154,7 +154,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[test_row][test_column].reset();                  // No options removed
     expected_cells[test_row][test_column].remove_option(1);					// Remove previous bit
 
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 
   #[test]
@@ -202,7 +202,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[test_row][test_column].reset();
     expected_cells[test_row][test_column].remove_option(1 + 2);     // Remove previous bit
 
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 
   #[test]
@@ -253,7 +253,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[test_row][test_column].reset();
     expected_cells[test_row][test_column].remove_option(1 + 2 + 4); // Remove previous bit
 
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 
   #[test]
@@ -311,7 +311,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[test_row][test_column].reset();
     expected_cells[test_row][test_column].remove_option(1 + 2 + 4 + 8); // Remove previous bit
 
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 
   #[test]
@@ -376,7 +376,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[1][1].set_by_position(0, 2, SetMethod::User);
     expected_cells[1][2].set_by_position(1, 2, SetMethod::User);
     
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
   }
 }
 
@@ -394,7 +394,7 @@ mod sub_grid_2x2 {
 
     // Ensure a 2 x 2 sub grid created
     let expected_cells = super::init_cells(&dimensions);
-    assert!(sub_grid.compare(expected_cells));
+    assert!(sub_grid.compare(&expected_cells));
     
     sub_grid.set_by_position(0, 0, 0, 0, SetMethod::User);        	// Top left cell set to 1
     sub_grid.set_by_position(1, 0, 1, 0, SetMethod::User);          // Top right cell set to 2

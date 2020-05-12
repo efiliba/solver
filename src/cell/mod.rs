@@ -3,7 +3,7 @@ pub mod cell;
 
 mod json_cell_column;
 mod json_cell_row;
-mod json_cell;
+pub mod json_cell;
 
 mod cell_test;
 

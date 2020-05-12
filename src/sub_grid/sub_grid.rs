@@ -62,9 +62,7 @@ impl<'a> SubGrid<'a> {
 
   pub fn reset(&mut self) {
     for row in 0..self.dimensions.rows {
-      self.cells.push(Vec::with_capacity(self.dimensions.columns));
       for column in 0..self.dimensions.columns {
-        // self.cells[row][column] = Cell::new(&self.dimensions, column, row);
         self.cells[row][column].reset();
       }
     }
@@ -75,7 +73,22 @@ impl<'a> SubGrid<'a> {
     &self.cells[row][column]
   }
 
-  pub fn compare(&self, items: Vec<Vec<Cell>>) -> bool {
+  pub fn compare(&self, items: &Vec<Vec<Cell>>) -> bool {
+    let mut equal = true;
+    let mut row = self.dimensions.rows;
+    while equal && row > 0 {
+      row -= 1;
+      let mut column = self.dimensions.columns;
+      while equal && column > 0 {
+        column -= 1;
+        equal = self.cells[row][column].equal(&items[row][column]);
+      }
+    }
+
+    equal
+  }
+
+  pub fn compare_ref(&self, items: &Vec<Vec<&Cell>>) -> bool {
     let mut equal = true;
     let mut row = self.dimensions.rows;
     while equal && row > 0 {
@@ -170,6 +183,20 @@ impl<'a> SubGrid<'a> {
     }
 
     solved
+  }
+
+  pub fn get_cells_matrix(&self) -> Vec<Vec<&Cell>> {
+    let mut matrix: Vec<Vec<&Cell>> = Vec::with_capacity(self.dimensions.rows);
+
+    for row in 0..self.dimensions.rows {
+      matrix.push(Vec::with_capacity(self.dimensions.columns));
+
+      for column in 0..self.dimensions.columns {
+        matrix[row].push(&self.cells[row][column]);
+      }
+    }
+
+    matrix
   }
 
   // Remove option from all other cells in this sub grid - return array of last options found and options removed from all columns / rows in the sub grid
@@ -372,7 +399,7 @@ impl<'a> SubGrid<'a> {
       option_found = (self.cells[cell_row][column].options & removed_option) > 0;
     }
 
-    return !option_found;                                           // If option not found then it was removed from this sub grid's row
+    !option_found                                                   // If option not found then it was removed from this sub grid's row
   }
 
 
