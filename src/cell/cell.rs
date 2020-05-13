@@ -9,7 +9,7 @@ pub struct Cell<'a> {
   pub column: usize,
   pub row: usize,
   pub options: usize,
-  pub json: JsonCell,
+  // pub json: JsonCell,
   pub total_options_remaining: usize,
 
   pub set_method: SetMethod,
@@ -50,7 +50,7 @@ impl<'a> Cell<'a> {
       column,
       row,
       options: (1 << dimensions.total) - 1, // Set all bits
-      json: JsonCell::new(dimensions),
+      // json: JsonCell::new(dimensions),
       total_options_remaining: dimensions.total,
       set_method: SetMethod::Unset,
       set_column: 0,

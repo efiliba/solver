@@ -4,20 +4,45 @@ extern crate solver;
 use solver::cell::cell::Cell2;
 use solver::cell::{cell::Cell, dimensions::Dimensions};
 use solver::sub_grid::sub_grid::SubGrid;
+use solver::grid::grid::Grid;
 
 // use solver::utils::bit_utils::highest_bit_position;
+
+fn init_sub_grids(dimensions: &Dimensions) -> Vec<Vec<SubGrid>> {
+  let mut sub_grids: Vec<Vec<SubGrid>> = Vec::with_capacity(dimensions.total);
+  let swopped = dimensions.swop();
+  for row in 0..dimensions.rows {
+    sub_grids.push(Vec::with_capacity(dimensions.columns));
+    for column in 0..dimensions.columns {
+      sub_grids[row].push(SubGrid::new(swopped, column, row));
+    }
+  }
+
+  sub_grids
+}
+
+
+  fn it_creates_a_4x1_grid() {
+    let columns = 2;
+    let rows = 1;
+    let dimensions = Dimensions::new(columns, rows);
+    let grid = Grid::new(&dimensions);
+
+    // Ensure a 2 x 4 sub grid created
+    let expected_sub_grids = init_sub_grids(&dimensions);
+    assert!(grid.compare(&expected_sub_grids));
+    // println!("{:#?}", grid);
+    // assert!(false);
+  }
 
 fn main() {
   // let combinations = Combinations::new(4);                          // Columns * rows
 
   // println!("Bits set in main: {}", bit_utils::number_of_bits_set(333)); // 333 = 101001101
-  // cell::test();
+
   println!("======================================");
 
-  // let dimensions = Dimensions::new(2, 2);
-
-  // let subgid = SubGrid::new(&dimensions, 0, 0);
-  // println!("***  subgid **** \n{}", subgid);
+  it_creates_a_4x1_grid();
 
   // let mut cell2 = Cell2::new(1, 1);
   // match cell2 {
@@ -33,31 +58,6 @@ fn main() {
 
   // println!("======================================\n");
 
-
-  // let mut cell = Cell::new(dimensions, 0, 0);
-  // // println!("options: {}", cell.options);
-
-  // cell.remove_option(1);
-  // println!("cell {}", cell);
-
-  // cell.reset();
-  // cell.test();
-
-  // let last_option_found = cell.remove_option_at_position(0, 0);
-  // cell.test();
-  // println!("Last option: {}", last_option_found);
-
-  // let last_option_found = cell.remove_option_at_position(0, 1);
-  // cell.test();
-  // println!("Last option: {}", last_option_found);
-
-  // let last_option_found = cell.remove_option_at_position(1, 0);
-  // cell.test();
-  // println!("Last option: {}", last_option_found);
-  // println!("Solved: {}", cell.solved());
-
-
-    // assert_eq!(highest_bit_position(2), 0);
   
   println!("__________________");
 

@@ -407,30 +407,3 @@ mod sub_grid_2x2 {
     assert!(sub_grid.solved());
   }
 }
-
-// #[cfg(test)]
-// mod sub_grid_2x3 {
-//   use crate::cell::{dimensions::Dimensions, SetMethod};
-//   use crate::sub_grid::sub_grid::SubGrid;
-
-//   #[test]
-//   fn it_simplifies_the_sub_grid() {
-//     let columns = 2;
-//     let rows = 3;
-//     let dimensions = Dimensions::new(columns, rows);
-//     let mut sub_grid = SubGrid::new(&dimensions, 0, 0);
-
-//     // Ensure a 2 x 3 sub grid created
-//     let expected_cells = super::init_cells(&dimensions);
-//     assert!(sub_grid.compare(expected_cells));
-    
-//   //     //            expect('ToDo').toBe('Not Finished yet');
-
-//   //     subGrid.get(0, 0).setByPosition(0, 0, SetMethod.loaded); // Top left cell set to 1
-
-//   //     //topLeftSubGrid[0, 0].set(1);
-//   //     //topLeftSubGrid[1, 0].set(2);
-//   //     //topLeftSubGrid.simplify(); return ICell[][]
-
-//   }
-// }
