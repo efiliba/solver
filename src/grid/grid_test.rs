@@ -42,30 +42,30 @@ mod grid {
     // let expected_sub_grids = super::init_sub_grids(&dimensions);
     // assert!(grid.compare(&expected_sub_grids));
 
-    	// 	// it("should be solved", () => {
-    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				// Set top left cell to 1
-    // grid.set_by_option(0, 1, 0, 0, 2, SetMethod::Loaded);            // Set next top cell to 2
-    // grid.set_by_option(0, 2, 0, 0, 4, SetMethod::Loaded);            // Set 3rd cell to 3
-    // grid.solve();
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
+    grid.set_by_option(0, 1, 0, 0, 2, SetMethod::Loaded);           // Set next top cell to 2
+    grid.set_by_option(0, 2, 0, 0, 4, SetMethod::Loaded);           // Set 3rd cell to 3
+    
+  // 1  14  14  14  
+  // 2  13  13  13  
+  // 4  11  11  11  
+  // 8   7   7   7  
 
-			// //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             1       | [ 14 | 14 | 14 ]
-			// //  --------------|-----------------       --------------|-----------------
-			// //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             2       | [ 13 | 13 | 13 ]
-			// //  --------------|-----------------  ->   --------------|-----------------
-			// //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             4       | [ 11 | 11 | 11 ]
-			// //  --------------|-----------------       --------------|-----------------
-			// //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]         |   |   | 8 | [  7 |  7 |  7 ]
+    println!("{}", grid);
 
-			// expectedSubGrids[0][0].setByOption(0, 0, 1, SetMethod.user);	// Top left cells set to 1, 2, 4 and 8
-			// expectedSubGrids[1][0].setByOption(0, 0, 2, SetMethod.user);
-			// expectedSubGrids[2][0].setByOption(0, 0, 4, SetMethod.user);
-			// expectedSubGrids[3][0].setByOption(0, 0, 8, SetMethod.user);
-			// expectedSubGrids[0][0].simplify();                            // Sets other cells to 14, 13, 11 and 7
-			// expectedSubGrids[1][0].simplify();
-			// expectedSubGrids[2][0].simplify();
-			// expectedSubGrids[3][0].simplify();                                                      
-			// expect(grid.compare(expectedSubGrids)).toBeTruthy();
-		// });
+
+
+
+    //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             1       | [ 14 | 14 | 14 ]
+    //  --------------|-----------------       --------------|-----------------
+    //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             2       | [ 13 | 13 | 13 ]
+    //  --------------|-----------------  ->   --------------|-----------------
+    //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             4       | [ 11 | 11 | 11 ]
+    //  --------------|-----------------       --------------|-----------------
+    //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]         |   |   | 8 | [  7 |  7 |  7 ]
+
+    
+    assert!(grid.solve(), "1x4 grid should be solved");
   }
 
 }

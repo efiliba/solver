@@ -35,7 +35,28 @@ fn init_sub_grids(dimensions: &Dimensions) -> Vec<Vec<SubGrid>> {
     // assert!(false);
   }
 
+  use std::fmt;
+
+struct Foo {
+  bar: usize
+}
+
+impl fmt::Display for Foo {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        if formatter.alternate() {
+            write!(formatter, "Foo({})", self.bar)
+        } else {
+            write!(formatter, "{}", self.bar)
+        }
+    }
+}
+
 fn main() {
+  
+  // assert_eq!(&format!("{:#}", Foo(23)), "Foo(23)");
+  // assert_eq!(&format!("{}", Foo(23)), "23");
+  // println!("1: {:#}", Foo {bar: 23});
+  // println!("2: {}", Foo {bar: 24});
   // let combinations = Combinations::new(4);                          // Columns * rows
 
   // println!("Bits set in main: {}", bit_utils::number_of_bits_set(333)); // 333 = 101001101

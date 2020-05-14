@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Combinations {                                           // C(n, r) = n! / r!(n-r)!
   set_bits_lookup_table: Vec<Vec<usize>>
 }
@@ -20,16 +21,17 @@ impl Combinations {
     Combinations { set_bits_lookup_table }
   }
 
-  pub fn select(&self, from: Vec<char>, pick: usize) -> Vec<Vec<char>> {
+  pub fn select<T>(&self, from: Vec<T>, pick: usize) -> Vec<Vec<T>> {
 		// Get bit flags used to select the combinations from the lookup table, up to the number of items to select from
 		let set_bits = 1 << from.len();
 		let lookup_table = &self.set_bits_lookup_table[pick];
-		let mut combinations: Vec<Vec<char>> = Vec::with_capacity(lookup_table.len());
+		let mut combinations: Vec<Vec<T>> = Vec::with_capacity(lookup_table.len());
 
     for index in 0..lookup_table.len() {
-      combinations.push(Vec::new());
+      // combinations.push(Vec::new());
 			if lookup_table[index] < set_bits {
-				combinations[index].extend_from_slice(&self.select_elements(&from, lookup_table[index]));
+        // combinations[index].extend_from_slice(&self.select_elements(&from, lookup_table[index]));
+				combinations.push(self.select_elements(&from, lookup_table[index])); // <------ TEST delete ^
 			}
 		}
 
@@ -37,13 +39,13 @@ impl Combinations {
 	}
 
 	// Return elements where the index is in the select bit flag
-	fn select_elements(&self, from: &Vec<char>, select: usize) -> Vec<char> {
+	fn select_elements<T>(&self, from: &Vec<T>, select: usize) -> Vec<T> {
 		let mut elements = Vec::with_capacity(from.len());
-    for index in 0..from.len() {
-			if (1 << index) & select > 0 {
-				elements.push(from[index]);
-			}
-		}
+    // for index in 0..from.len() {
+		// 	if (1 << index) & select > 0 {
+		// 		elements.push(from[index]);
+		// 	}
+		// }
 
 		elements
 	}
