@@ -4,7 +4,7 @@ pub struct Combinations {                                           // C(n, r) =
 }
 
 impl Combinations {
-  pub fn new(max_items_select_from: usize) -> Combinations {
+  pub fn new(max_items_select_from: usize) -> Self {
     let set_bits = create_set_bits_lookup(max_items_select_from);
     let mut set_bits_lookup_table: Vec<Vec<usize>> = Vec::with_capacity(max_items_select_from);
 
@@ -18,36 +18,22 @@ impl Combinations {
       }
     }
 
-    Combinations { set_bits_lookup_table }
+    Self { set_bits_lookup_table }
   }
 
-  pub fn select<T>(&self, from: Vec<T>, pick: usize) -> Vec<Vec<T>> {
+  pub fn select<'a, T>(&self, from: &'a Vec<T>, pick: usize) -> Vec<Vec<&'a T>> {
 		// Get bit flags used to select the combinations from the lookup table, up to the number of items to select from
-		let set_bits = 1 << from.len();
+    let set_bits = 1 << from.len();
 		let lookup_table = &self.set_bits_lookup_table[pick];
-		let mut combinations: Vec<Vec<T>> = Vec::with_capacity(lookup_table.len());
+		let mut combinations = Vec::with_capacity(lookup_table.len());
 
     for index in 0..lookup_table.len() {
-      // combinations.push(Vec::new());
 			if lookup_table[index] < set_bits {
-        // combinations[index].extend_from_slice(&self.select_elements(&from, lookup_table[index]));
-				combinations.push(self.select_elements(&from, lookup_table[index])); // <------ TEST delete ^
+				combinations.push(select_elements(&from, lookup_table[index]));
 			}
 		}
 
 		combinations
-	}
-
-	// Return elements where the index is in the select bit flag
-	fn select_elements<T>(&self, from: &Vec<T>, select: usize) -> Vec<T> {
-		let mut elements = Vec::with_capacity(from.len());
-    // for index in 0..from.len() {
-		// 	if (1 << index) & select > 0 {
-		// 		elements.push(from[index]);
-		// 	}
-		// }
-
-		elements
 	}
 }
 
@@ -69,4 +55,16 @@ fn create_set_bits_lookup(n: usize) -> Vec<usize> {
   }
 
   lookup_table
+}
+
+// Return elements where the index is in the select bit flag
+fn select_elements<'a, T>(from: &'a Vec<T>, select: usize) -> Vec<&'a T> {
+  let mut elements = Vec::with_capacity(from.len());
+  for index in 0..from.len() {
+    if (1 << index) & select > 0 {
+      elements.push(&from[index]);
+    }
+  }
+
+  elements
 }
