@@ -12,7 +12,7 @@ pub struct SubGrid<'a> {
 }
 
 impl Display for SubGrid<'_> {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+  fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     fn add_separator_line(output: &mut String, dimensions: &Dimensions) {
       // All left aligned padding '-' to ''
       fmt::write(output, format_args!("{:-<1$}", "", (dimensions.total + 1) * dimensions.columns - 1))
@@ -24,19 +24,32 @@ impl Display for SubGrid<'_> {
     }
 
     let mut output = String::new();
-    add_separator_line(&mut output, self.dimensions);
-    add_new_line(&mut output);
+
+    if formatter.alternate() {
+      add_separator_line(&mut output, self.dimensions);
+      add_new_line(&mut output);
+    }
 
     for row in 0..self.dimensions.rows {
       for column in 0..self.dimensions.columns {
-        fmt::write(&mut output, format_args!("{} ", self.cells[row][column]))
-          .expect("Error writing cell in sub-grid");
+        if formatter.alternate() {
+          fmt::write(&mut output, format_args!("{:#} ", self.cells[row][column]))
+            .expect("Error writing cell in sub-grid");
+        } else {
+          fmt::write(&mut output, format_args!("{} ", self.cells[row][column]))
+            .expect("Error writing cell in sub-grid");
+        }
       }
       add_new_line(&mut output);
     }
-    add_separator_line(&mut output, self.dimensions);
 
-    write!(f, "{}", output)
+    if formatter.alternate() {
+      add_separator_line(&mut output, self.dimensions);
+    } else {
+      output.pop();                                                 // Remove last new line
+    }
+
+    write!(formatter, "{}", output)
   }
 }
 

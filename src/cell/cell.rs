@@ -17,10 +17,13 @@ pub struct Cell<'a> {
   set_row: usize,
 }
 
-
 impl Display for Cell<'_> {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{:b}", self.options)
+  fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    if formatter.alternate() {
+      write!(formatter, "{:0>1$b}", self.options, (self.dimensions.total + 1) * self.dimensions.columns - 1)
+    } else {
+      write!(formatter, "{:>3}", self.options)
+    }
   }
 }
 
