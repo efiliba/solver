@@ -90,7 +90,7 @@ impl<'a> Cell<'a> {
     self.total_options_remaining == 1
   }
 
-  // 	constructor(public column: any, public row?: number) {
+  // 	constructor(pub fn column: any, pub fn row?: number) {
   // 		if (typeof column === "number") {
   // 			this.reset();
   // 		} else {                                                     		// Copy constructor
@@ -124,7 +124,7 @@ impl<'a> Cell<'a> {
   // 		}
   // 	}
 
-  // 	public equal(cell: Cell): boolean {
+  // 	pub fn equal(cell: Cell): bool {
   // 		return (this.setColumn === cell.setColumn || cell.setColumn === -1) &&
   // 			(this.setRow === cell.setRow || cell.setRow === -1) && this.options === cell.options;
   // 		//return this.options === cell.options;
@@ -156,12 +156,12 @@ impl<'a> Cell<'a> {
     last_option_found
   }
 
-  // 	public toggleRemoveOptionAtPositionShallow(column: number, row: number): void {
+  // 	pub fn toggleRemoveOptionAtPositionShallow(column: number, row: number): void {
   // 		const cell = this.json.rows[row].columns[column];
   // 		cell.strikeOut = !cell.strikeOut;
   // 	}
 
-  // 	public toggleHighlightOptionAtPosition(column: number, row: number): void {
+  // 	pub fn toggleHighlightOptionAtPosition(column: number, row: number): void {
   // 		const cell = this.json.rows[row].columns[column];
   // 		cell.highlight = !cell.highlight;
   // 	}
@@ -234,10 +234,6 @@ impl<'a> Cell<'a> {
   }
 
   pub fn set_by_symbol(&mut self, symbol: char, set_method: SetMethod) {
-    fn find_symbol_index(symbol: char) -> usize {
-      SYMBOLS.iter().position(|&x| x == symbol).unwrap()
-    }
-
     self.set_by_index(find_symbol_index(symbol), set_method);
   }
 
@@ -254,10 +250,9 @@ impl<'a> Cell<'a> {
     self.options & check_options == check_options
   }
 
-  // 	public containsSymbol(symbol: string): boolean {
-  // 		const index: number = Cell.symbols.indexOf(symbol);
-  // 		return (this.options & 1 << index) > 0; // eslint-disable-line no-mixed-operators
-  // 	}
+  pub fn contains_symbol(&self, symbol: char) -> bool {
+    self.options & 1 << find_symbol_index(symbol) > 0
+  }
 
   fn set_remaining_option(&mut self, options: usize) {
     let index = highest_bit_position(options);
@@ -265,7 +260,7 @@ impl<'a> Cell<'a> {
     self.set_row = index / self.dimensions.columns >> 0;
   }
 
-  // 	// private clearAllExcept(option: number, fix: boolean) {
+  // 	// private clearAllExcept(option: number, fix: bool) {
   // 	// 	this.options = option;
   // 	// 	this.json = { symbol: Cell.symbols[powerOf2BitPositions[option]], fixed: fix };
   // 	// 	this.totalOptionsRemaining = 1;
@@ -292,11 +287,11 @@ impl<'a> Cell<'a> {
   }
 
   // 	// Remove options iff cell contains other options
-  // 	public removeIfExtraOptions(options: number): boolean {
+  // 	pub fn removeIfExtraOptions(options: number): bool {
   // 		return this.totalOptionsRemaining > 1 && (this.options & ~options) > 0 && this.removeOptions(options);
   // 	}
 
-  // 	public setJson(json: IJsonCell) {
+  // 	pub fn setJson(json: IJsonCell) {
   // 		if (json.rows) {
   // 			this.options = 0;
   // 			this.totalOptionsRemaining = 0;
@@ -316,4 +311,8 @@ impl<'a> Cell<'a> {
   // 		this.json = json;
   // 	}
   // }
+}
+
+fn find_symbol_index(symbol: char) -> usize {
+  SYMBOLS.iter().position(|&x| x == symbol).unwrap()
 }

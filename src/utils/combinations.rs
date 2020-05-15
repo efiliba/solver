@@ -6,16 +6,17 @@ pub struct Combinations {                                           // C(n, r) =
 impl Combinations {
   pub fn new(max_items_select_from: usize) -> Self {
     let set_bits = create_set_bits_lookup(max_items_select_from);
-    let mut set_bits_lookup_table: Vec<Vec<usize>> = Vec::with_capacity(max_items_select_from);
+    let mut set_bits_lookup_table = Vec::with_capacity(max_items_select_from);
 
+    let set_bits_length = set_bits.len();
     for index in 0..=max_items_select_from {
-      set_bits_lookup_table.push(Vec::new());
-
-      for bit in 0..set_bits.len() {                                // Get indices of items with respective choices
+      let mut lookup_row = Vec::with_capacity(set_bits_length - 1);
+      for bit in 0..set_bits_length {                               // Get indices of items with respective choices
         if set_bits[bit] == index {
-					set_bits_lookup_table[index].push(bit);
+          lookup_row.push(bit);
 				}
       }
+      set_bits_lookup_table.push(lookup_row);
     }
 
     Self { set_bits_lookup_table }

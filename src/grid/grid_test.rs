@@ -50,11 +50,13 @@ mod grid {
   // 2  13  13  13  
   // 4  11  11  11  
   // 8   7   7   7  
+// grid.ttt();
+    println!("{}", &grid);
+    grid.solve();
+    println!("Solved:\n{}", &grid);
 
-    println!("{}", grid);
 
-
-
+assert!(false);
 
     //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]             1       | [ 14 | 14 | 14 ]
     //  --------------|-----------------       --------------|-----------------
@@ -65,7 +67,7 @@ mod grid {
     //  1 | 2 | 4 | 8 | [ 15 | 15 | 15 ]         |   |   | 8 | [  7 |  7 |  7 ]
 
     
-    assert!(grid.solve(), "1x4 grid should be solved");
+    // assert!(grid.solve(), "1x4 grid should be solved");
   }
 
 }

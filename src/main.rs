@@ -5,51 +5,20 @@ use solver::cell::cell::Cell2;
 use solver::cell::{cell::Cell, dimensions::Dimensions};
 use solver::sub_grid::sub_grid::SubGrid;
 use solver::grid::grid::Grid;
+use solver::utils::combinations::Combinations;
 
 // use solver::utils::bit_utils::highest_bit_position;
 
-fn init_sub_grids(dimensions: &Dimensions) -> Vec<Vec<SubGrid>> {
-  let mut sub_grids: Vec<Vec<SubGrid>> = Vec::with_capacity(dimensions.total);
-  let swopped = dimensions.swop();
-  for row in 0..dimensions.rows {
-    sub_grids.push(Vec::with_capacity(dimensions.columns));
-    for column in 0..dimensions.columns {
-      sub_grids[row].push(SubGrid::new(swopped, column, row));
-    }
-  }
+	fn select_elements<'a, T>(from: &'a Vec<T>, select: usize) -> Vec<&'a T> {
+		let mut elements = Vec::with_capacity(from.len());
+    for index in 0..from.len() {
+			if (1 << index) & select > 0 {
+				elements.push(&from[index]);
+			}
+		}
 
-  sub_grids
-}
-
-
-  fn it_creates_a_4x1_grid() {
-    let columns = 2;
-    let rows = 1;
-    let dimensions = Dimensions::new(columns, rows);
-    let grid = Grid::new(&dimensions);
-
-    // Ensure a 2 x 4 sub grid created
-    let expected_sub_grids = init_sub_grids(&dimensions);
-    assert!(grid.compare(&expected_sub_grids));
-    // println!("{:#?}", grid);
-    // assert!(false);
-  }
-
-  use std::fmt;
-
-struct Foo {
-  bar: usize
-}
-
-impl fmt::Display for Foo {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        if formatter.alternate() {
-            write!(formatter, "Foo({})", self.bar)
-        } else {
-            write!(formatter, "{}", self.bar)
-        }
-    }
-}
+		elements
+	}
 
 fn main() {
   
@@ -63,7 +32,14 @@ fn main() {
 
   println!("======================================");
 
-  it_creates_a_4x1_grid();
+    let combinations = Combinations::new(4);
+    let from = vec!['1', '2', '3'];
+		let pick = 2;
+    let actual = combinations.select(&from, pick);
+  
+    
+    println!("{:?}", actual);
+
 
   // let mut cell2 = Cell2::new(1, 1);
   // match cell2 {

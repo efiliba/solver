@@ -40,7 +40,6 @@ impl Display for SubGrid<'_> {
             .expect("Error writing cell in sub-grid");
         }
       }
-      add_new_line(&mut output);
     }
 
     if formatter.alternate() {
@@ -49,7 +48,7 @@ impl Display for SubGrid<'_> {
       output.pop();                                                 // Remove last new line
     }
 
-    write!(formatter, "{}", output)
+    writeln!(formatter, "{}", output)
   }
 }
 
@@ -84,36 +83,6 @@ impl<'a> SubGrid<'a> {
   pub fn get(&self, column: usize, row: usize) -> &Cell {
     // grids called by [column, row] but accessed by [row][column] for efficiency
     &self.cells[row][column]
-  }
-
-  pub fn compare(&self, items: &Vec<Vec<Cell>>) -> bool {
-    let mut equal = true;
-    let mut row = self.dimensions.rows;
-    while equal && row > 0 {
-      row -= 1;
-      let mut column = self.dimensions.columns;
-      while equal && column > 0 {
-        column -= 1;
-        equal = self.cells[row][column].equal(&items[row][column]);
-      }
-    }
-
-    equal
-  }
-
-  pub fn compare_ref(&self, items: &Vec<Vec<&Cell>>) -> bool {
-    let mut equal = true;
-    let mut row = self.dimensions.rows;
-    while equal && row > 0 {
-      row -= 1;
-      let mut column = self.dimensions.columns;
-      while equal && column > 0 {
-        column -= 1;
-        equal = self.cells[row][column].equal(&items[row][column]);
-      }
-    }
-
-    equal
   }
 
   pub fn set_by_position(
@@ -163,6 +132,36 @@ impl<'a> SubGrid<'a> {
     0
   }
 
+  pub fn compare(&self, items: &Vec<Vec<Cell>>) -> bool {
+    let mut equal = true;
+    let mut row = self.dimensions.rows;
+    while equal && row > 0 {
+      row -= 1;
+      let mut column = self.dimensions.columns;
+      while equal && column > 0 {
+        column -= 1;
+        equal = self.cells[row][column].equal(&items[row][column]);
+      }
+    }
+
+    equal
+  }
+
+  pub fn compare_ref(&self, items: &Vec<Vec<&Cell>>) -> bool {
+    let mut equal = true;
+    let mut row = self.dimensions.rows;
+    while equal && row > 0 {
+      row -= 1;
+      let mut column = self.dimensions.columns;
+      while equal && column > 0 {
+        column -= 1;
+        equal = self.cells[row][column].equal(&items[row][column]);
+      }
+    }
+
+    equal
+  }
+
   pub fn simplify(&mut self) {
     let mut changed = true;
     while changed {
@@ -198,6 +197,20 @@ impl<'a> SubGrid<'a> {
     solved
   }
 
+  pub fn get_available_options_matrix(&self) -> Vec<Vec<usize>> {
+    let mut matrix = Vec::with_capacity(self.dimensions.rows - 1);
+
+    for row in 0..self.dimensions.rows {
+      let mut matrix_row = Vec::with_capacity(self.dimensions.columns - 1);
+      for column in 0..self.dimensions.columns {
+        matrix_row.push(self.cells[row][column].options);
+      }
+      matrix.push(matrix_row);
+    }
+
+    matrix
+  }
+
   pub fn get_cells_matrix(&self) -> Vec<Vec<&Cell>> {
     let mut matrix: Vec<Vec<&Cell>> = Vec::with_capacity(self.dimensions.rows);
 
@@ -210,6 +223,43 @@ impl<'a> SubGrid<'a> {
     }
 
     matrix
+  }
+
+  pub fn get_unset_cells(&self) -> Vec<Cell> {
+    let mut unset_cells = Vec::new();
+
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        if self.cells[row][column].set_method == SetMethod::Unset {
+          // unset_cells.push(new Cell(this.cells[row][column])); // Set copy of cell
+        }
+      }
+    }
+    return unset_cells;
+  }
+
+  pub fn unset_cells(&self, total_unset_options: usize) -> Vec<Cell> {
+    let mut cells = self.get_unset_cells();
+    let mut unset = Vec::new();
+    for index in 0..cells.len() {
+      if cells[index].total_options_remaining == total_unset_options {
+        // unset.push(cells[index]);
+      }
+    }
+
+    unset
+  }
+
+  pub fn get_available_options(&self) -> Vec<usize> {
+    let mut array = Vec::with_capacity(self.dimensions.total);
+    
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        array.push(self.cells[row][column].options);
+      }
+    }
+
+    array
   }
 
   // Remove option from all other cells in this sub grid - return array of last options found and options removed from all columns / rows in the sub grid
@@ -369,6 +419,14 @@ impl<'a> SubGrid<'a> {
     }
   }
 
+  pub fn is_struck_out(
+    &self,
+    cell_column: usize,
+    cell_row: usize,
+    symbol: char
+  ) -> bool {
+    !self.cells[cell_row][cell_column].contains_symbol(symbol)
+  }
 
   pub fn remove_options_from_column(&mut self, cell_column: usize, options: usize) -> Vec<BitOption> {
     let mut last_options = Vec::new();
@@ -490,6 +548,62 @@ impl<'a> SubGrid<'a> {
     last_options
   }
 
+  pub fn remove_if_extra_options_from_column(&mut self, column: usize, options: usize) -> Vec<BitOption> {
+    let mut last_options = Vec::new();
+
+    for row in 0..self.dimensions.rows {
+      if self.cells[row][column].remove_options(options) {
+        last_options.push(BitOption {
+          sub_grid_column: self.column,
+          sub_grid_row: self.row,
+          cell_column: column,
+          cell_row: row,
+          bits: self.cells[row][column].options,
+        });
+      }
+    }
+
+    last_options
+  }
+
+  pub fn remove_if_extra_options_from_row(&mut self, row: usize, options: usize) -> Vec<BitOption> {
+    let mut last_options = Vec::new();
+
+    for column in 0..self.dimensions.columns {
+      if self.cells[row][column].remove_options(options) {
+        last_options.push(BitOption {
+          sub_grid_column: self.column,
+          sub_grid_row: self.row,
+          cell_column: column,
+          cell_row: row,
+          bits: self.cells[row][column].options,
+        });
+      }
+    }
+
+    last_options
+  }
+
+  pub fn remove_if_extra_options(&mut self, options: usize) -> Vec<BitOption> {
+    let mut last_options = Vec::new();
+
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        if self.cells[row][column].remove_options(options) {
+          last_options.push(BitOption {
+            sub_grid_column: self.column,
+            sub_grid_row: self.row,
+            cell_column: column,
+            cell_row: row,
+            bits: self.cells[row][column].options,
+          });
+        }
+      }
+    }
+
+    last_options
+  }
+
   pub fn option_exists_in_column(&self, column: usize, option: usize) -> bool {
     let mut found = false;
     let mut row = self.dimensions.rows;
@@ -557,212 +671,6 @@ impl<'a> SubGrid<'a> {
 
     !option_found                                                   // If option not found then it was removed from self sub grid's row
   }
-
-
-  // pub fn remove_optionsExceptFromColumn(
-  //   exclude_column: usize,
-  //   options: usize
-  // ): BitOption[] {
-  //   let last_options: BitOption[] = [];
-
-  //   let row: usize;
-  //   let column: usize = self.dimensions.columns;
-  //   while (--column > exclude_column) {
-  //     row = self.dimensions.rows;
-  //     while (row--) {
-  //       if (self.cells[row][column].remove_options(options)) {
-  //         last_options.push({
-  //           sub_grid_column: self.column,
-  //           sub_grid_row: self.row,
-  //           cell_column: column,
-  //           cell_row: row,
-  //           bits: self.cells[row][column].options,
-  //         });
-  //         //                        self.remainingCells--;
-  //       }
-  //     }
-  //   }
-
-  //   while (column--) {
-  //     row = self.dimensions.rows;
-  //     while (row--) {
-  //       if (self.cells[row][column].remove_options(options)) {
-  //         last_options.push({
-  //           sub_grid_column: self.column,
-  //           sub_grid_row: self.row,
-  //           cell_column: column,
-  //           cell_row: row,
-  //           bits: self.cells[row][column].options,
-  //         });
-  //         //                        self.remainingCells--;
-  //       }
-  //     }
-  //   }
-
-  //   return last_options;
-  // }
-
-  // pub fn remove_optionsExceptFromRow(
-  //   exclude_row: usize,
-  //   options: usize
-  // ): BitOption[] {
-  //   let last_options: BitOption[] = [];
-
-  //   let column: usize;
-  //   let row: usize = self.dimensions.rows;
-  //   while (--row > exclude_row) {
-  //     column = self.dimensions.columns;
-  //     while (column--) {
-  //       if (self.cells[row][column].remove_options(options)) {
-  //         last_options.push({
-  //           sub_grid_column: self.column,
-  //           sub_grid_row: self.row,
-  //           cell_column: column,
-  //           cell_row: row,
-  //           bits: self.cells[row][column].options,
-  //         });
-  //         //                        self.remainingCells--;
-  //       }
-  //     }
-  //   }
-
-  //   while (row--) {
-  //     column = self.dimensions.columns;
-  //     while (column--) {
-  //       if (self.cells[row][column].remove_options(options)) {
-  //         last_options.push({
-  //           sub_grid_column: self.column,
-  //           sub_grid_row: self.row,
-  //           cell_column: column,
-  //           cell_row: row,
-  //           bits: self.cells[row][column].options,
-  //         });
-  //         //                        self.remainingCells--;
-  //       }
-  //     }
-  //   }
-
-  //   return last_options;
-  // }
-
-  // pub fn remove_if_extra_options_from_column(
-  //   column: usize,
-  //   options: usize
-  // ) -> Vec<BitOption> {
-  //   let last_options: BitOption[] = [];
-
-  //   for (let row: usize = 0; row < self.dimensions.rows; row++) {
-  //     if (self.cells[row][column].remove_options(options)) {
-  //       last_options.push({
-  //         sub_grid_column: self.column,
-  //         sub_grid_row: self.row,
-  //         cell_column: column,
-  //         cell_row: row,
-  //         bits: self.cells[row][column].options,
-  //       });
-  //       //                    self.remainingCells--;
-  //     }
-  //   }
-
-  //   return last_options;
-  // }
-
-  // pub fn removeIfExtraOptionsFromRow(row: usize, options: usize): BitOption[] {
-  //   let last_options: BitOption[] = [];
-
-  //   for (let column: usize = 0; column < self.dimensions.columns; column++) {
-  //     if (self.cells[row][column].remove_options(options)) {
-  //       last_options.push({
-  //         sub_grid_column: self.column,
-  //         sub_grid_row: self.row,
-  //         cell_column: column,
-  //         cell_row: row,
-  //         bits: self.cells[row][column].options,
-  //       });
-  //       //                    self.remainingCells--;
-  //     }
-  //   }
-
-  //   return last_options;
-  // }
-
-  pub fn remove_if_extra_options(&mut self, options: usize) -> Vec<BitOption> {
-    let mut last_options = Vec::new();
-
-    for row in 0..self.dimensions.rows {
-      for column in 0..self.dimensions.columns {
-        if self.cells[row][column].remove_options(options) {
-          last_options.push(BitOption {
-            sub_grid_column: self.column,
-            sub_grid_row: self.row,
-            cell_column: column,
-            cell_row: row,
-            bits: self.cells[row][column].options,
-          });
-        }
-      }
-    }
-
-    return last_options;
-  }
-
-  // pub fn optionExistsInColumn(column: usize, option: usize): boolean {
-  //   let found: boolean = false;
-  //   let row: usize = self.dimensions.rows;
-  //   while (!found && row--) {
-  //     found = self.cells[row][column].containsOption(option);
-  //   }
-
-  //   return found;
-  // }
-
-  // pub fn optionExistsInRow(row: usize, option: usize): boolean {
-  //   let found: boolean = false;
-  //   let column: usize = self.dimensions.columns;
-  //   while (!found && column-- > 0) {
-  //     found = self.cells[row][column].containsOption(option);
-  //   }
-
-  //   return found;
-  // }
-
-  // pub fn optionRemovedFromColumn(
-  //   cell_column: usize,
-  //   cell_row: usize,
-  //   option: usize
-  // ): boolean {
-  //   // Check if option removed from column
-  //   let optionFound: boolean = false;
-
-  //   let row: usize = self.dimensions.rows;
-  //   while (!optionFound && --row > cell_row) {
-  //     optionFound = (self.cells[row][cell_column].options & option) > 0;
-  //   }
-  //   while (!optionFound && row--) {
-  //     optionFound = (self.cells[row][cell_column].options & option) > 0;
-  //   }
-
-  //   return !optionFound; // If option not found then it was removed from self sub grid's column
-  // }
-
-  // pub fn optionRemovedFromRow(
-  //   cell_column: usize,
-  //   cell_row: usize,
-  //   removedOption: usize
-  // ): boolean {
-  //   // Check if option removed from row
-  //   let optionFound: boolean = false;
-  //   let column: usize = self.dimensions.columns;
-  //   while (!optionFound && --column > cell_column) {
-  //     optionFound = (self.cells[cell_row][column].options & removedOption) > 0;
-  //   }
-  //   while (!optionFound && column--) {
-  //     optionFound = (self.cells[cell_row][column].options & removedOption) > 0;
-  //   }
-
-  //   return !optionFound; // If option not found then it was removed from self sub grid's row
-  // }
-
 
   pub fn set_cells(&self, sub_grid: Vec<Vec<Cell>>) {
     for row in 0..self.dimensions.rows {
