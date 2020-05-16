@@ -141,14 +141,14 @@ impl<'a> Grid<'a> {
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize
+    option_column: usize,
+    option_row: usize
   ): bool {
     const cell: ICell = self.sub_grids[sub_grid_row][sub_grid_column].get(
       cell_column,
       cell_row
     );
-    if (cell.removeOptionAtPosition(optionColumn, optionRow)) {
+    if (cell.removeOptionAtPosition(option_column, option_row)) {
       // Check if last option left
       self.total_set++;
       self.strike_out(
@@ -516,36 +516,30 @@ impl<'a> Grid<'a> {
       symbol
     );
   }
-
-  public fixByPosition(
+*/
+  pub fn fix_by_position(
+    &mut self,
     sub_grid_column: usize,
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize
+    option_column: usize,
+    option_row: usize
   ) {
-    if (
-      self.sub_grids[sub_grid_row][sub_grid_column].setByPosition(
-        cell_column,
-        cell_row,
-        optionColumn,
-        optionRow,
-        SetMethod.loaded
-      )
-    ) {
-      self.total_set++;
-    }
-
-    self.strike_out(
-      sub_grid_column,
-      sub_grid_row,
+    if self.sub_grids[sub_grid_row][sub_grid_column].set_by_position(
       cell_column,
       cell_row,
-      1 << (self.dimensions.columns * optionRow + optionColumn)
-    );
+      option_column,
+      option_row,
+      SetMethod::Loaded
+    ) {
+      self.total_set += 1;
+    }
+
+    let option = 1 << (self.dimensions.columns * option_row + option_column);
+    self.strike_out(sub_grid_column, sub_grid_row, cell_column, cell_row, option);
   }
-*/
+
   pub fn set_by_option(
     &mut self,
     sub_grid_column: usize,
@@ -589,16 +583,16 @@ impl<'a> Grid<'a> {
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize,
+    option_column: usize,
+    option_row: usize,
     set_method: SetMethod = SetMethod.user
   ) {
     if (
-      self.sub_grids[sub_grid_row][sub_grid_column].setByPosition(
+      self.sub_grids[sub_grid_row][sub_grid_column].set_by_position(
         cell_column,
         cell_row,
-        optionColumn,
-        optionRow,
+        option_column,
+        option_row,
         set_method
       )
     ) {
@@ -611,14 +605,14 @@ impl<'a> Grid<'a> {
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize
+    option_column: usize,
+    option_row: usize
   ) {
     const cell: ICell = self.sub_grids[sub_grid_row][sub_grid_column].get(
       cell_column,
       cell_row
     );
-    cell.toggleRemoveOptionAtPositionShallow(optionColumn, optionRow);
+    cell.toggleRemoveOptionAtPositionShallow(option_column, option_row);
   }
 
   public togglePencilInAtPositionShallow(
@@ -626,14 +620,14 @@ impl<'a> Grid<'a> {
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize
+    option_column: usize,
+    option_row: usize
   ) {
     const cell: ICell = self.sub_grids[sub_grid_row][sub_grid_column].get(
       cell_column,
       cell_row
     );
-    cell.toggleHighlightOptionAtPosition(optionColumn, optionRow);
+    cell.toggleHighlightOptionAtPosition(option_column, option_row);
   }
 
   public fixByOptions(fixedOptions: usize[]) {
@@ -769,15 +763,15 @@ impl<'a> Grid<'a> {
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    optionColumn: usize,
-    optionRow: usize
+    option_column: usize,
+    option_row: usize
   ): bool {
     return self.removeUnavailableOptions(
       sub_grid_column,
       sub_grid_row,
       cell_column,
       cell_row,
-      1 << (self.dimensions.columns * optionRow + optionColumn)
+      1 << (self.dimensions.columns * option_row + option_column)
     );
   }
 
@@ -935,91 +929,82 @@ impl<'a> Grid<'a> {
   }
 
   fn find_options_limited_to_sub_grids(&self) -> Vec<LimitedBitOption> {
-    let limited_options: Vec<LimitedBitOption> = Vec::new();
-    // let pick_options: ICell[] = [];
-    // let combination_options: usize[] = [];
+    let mut limited_options = Vec::new();
+    let mut pick_options: Vec<&Cell> = Vec::new();
+    let mut combination_options = Vec::new();
+    
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        let unset_cells = self.sub_grids[row][column].get_unset_cells();
+        let total_unset_cells = unset_cells.len();
 
-    // for (let row: usize = 0; row < self.dimensions.rows; row++) {
-    //   for (let column: usize = 0; column < self.dimensions.columns; column++) {
-    //     let unset_cells: ICell[] = self.sub_grids[row][column].getUnsetCells();
-    //     let total_unset_cells: usize = unset_cells.len();
+        // int max_remaining_options = unset_cells.Where(x => x.TotalOptionsRemaining < total_unset_cells).Max(x => (int?) x.TotalOptionsRemaining) ?? 0;    // Max < total_unset_cells
+        let mut max_remaining_options = 0;
+        let mut index = total_unset_cells;
+				while index > 0 {
+					index -= 1;
+          let total_options_remaining = unset_cells[index].total_options_remaining;
+          if total_options_remaining < total_unset_cells && total_options_remaining > max_remaining_options {
+            max_remaining_options = total_options_remaining;
+          }
+        }
 
-    //     // int max_remaining_options = unset_cells.Where(x => x.TotalOptionsRemaining < total_unset_cells).Max(x => (int?) x.TotalOptionsRemaining) ?? 0;    // Max < total_unset_cells
-    //     let max_remaining_options: usize = 0;
-    //     let index: usize = total_unset_cells;
-		// 		while index > 0 {
-		// 			index -= 1;
-    //       const total_options_remaining: usize =
-    //         unset_cells[index].total_options_remaining;
-    //       if (
-    //         total_options_remaining < total_unset_cells &&
-    //         total_options_remaining > max_remaining_options
-    //       ) {
-    //         max_remaining_options = total_options_remaining;
-    //       }
-    //     }
+        let mut found = false;
+        let mut pick = 1;
+        while !found && pick < max_remaining_options {
+          pick += 1;
+          // Clear arrays
+          combination_options.clear();
+          pick_options.clear();
 
-    //     let found: bool = false;
-    //     let pick: usize = 1;
-    //     while (!found && pick++ < max_remaining_options) {
-    //       while (combination_options.len()) {
-    //         // Clear arrays
-    //         combination_options.pop();
-    //       }
-    //       while (pick_options.len()) {
-    //         pick_options.pop();
-    //       }
+          // Get options with at least the number of bits to pick set
+          // IEnumerable <Cell> options = unset_cells.Where(x => x.TotalOptionsRemaining <= pick); // Get options with at least the number of bits to pick set
+          index = total_unset_cells;
+					while index > 0 {
+						index -= 1;
+            if unset_cells[index].total_options_remaining <= pick {
+              // let t: &Cell = &unset_cells[index];
+              // pick_options.push(t);      // ToDo:
+            }
+          }
 
-    //       // Get options with at least the number of bits to pick set
-    //       // IEnumerable <Cell> options = unset_cells.Where(x => x.TotalOptionsRemaining <= pick); // Get options with at least the number of bits to pick set
-    //       index = total_unset_cells;
-		// 			while index > 0 {
-		// 				index -= 1;
-    //         if (unset_cells[index].total_options_remaining <= pick) {
-    //           pick_options.push(unset_cells[index]);
-    //         }
-    //       }
+          let combinations = self.combinations.select(&pick_options, pick);
+          index = combinations.len();
+          while !found && index > 0 {
+						index -= 1;
+            // int remove_options = BitwiseOR(enumerator.Current.Select(x => x.Options));
+            let mut combinations_index = combinations[index].len();
+            while combinations_index > 0 {
+              combinations_index -= 1;
+              combination_options.push(
+                combinations[index][combinations_index].options
+              );
+            }
+            let remove_options = bitwise_or(&combination_options);
 
-    //       let combinations: ICell[][] = Grid.combinations.select(
-    //         pick_options,
-    //         pick
-    //       );
-    //       index = combinations.len();
-    //       while !found && index > 0 {
-		// 				index -= 1;
-    //         // int remove_options = BitwiseOR(enumerator.Current.Select(x => x.Options));
-    //         let combinations_index: usize = combinations[index].len();
-    //         while (combinations_index--) {
-    //           combination_options.push(
-    //             combinations[index][combinations_index].options
-    //           );
-    //         }
-    //         let remove_options: usize = bitwise_or(combination_options);
-
-    //         found = number_of_bits_set(remove_options) <= pick;
-    //         if (found) {
-    //           limited_options.push({
-    //             column: column,
-    //             row: row,
-    //             options: remove_options,
-    //           });
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
+            found = number_of_bits_set(remove_options) <= pick;
+            if found {
+              limited_options.push(LimitedBitOption {
+                column,
+                row,
+                options: remove_options,
+              });
+            }
+          }
+        }
+      }
+    }
 
     limited_options
   }
 
   fn remove_if_extra_options_from_column(&mut self, limited_options: &Vec<LimitedBitOption>) -> bool {
-    let mut last_options: Vec<BitOption> = Vec::new();
+    let mut last_options = Vec::new();
 
-    let mut limited_option: &LimitedBitOption;
     let mut index = limited_options.len();
 		while index > 0 {
 			index -= 1;
-      limited_option = &limited_options[index];
+      let limited_option = &limited_options[index];
       for row in 0..self.dimensions.rows {
         last_options.append(&mut self.sub_grids[row][
             (limited_option.column / self.dimensions.rows) >> 0
@@ -1031,11 +1016,10 @@ impl<'a> Grid<'a> {
       }
     }
 
-    let mut last_option: &BitOption;
     index = last_options.len();
 		while index > 0 {
 			index -= 1;
-      last_option = &last_options[index];
+      let last_option = &last_options[index];
       self.strike_out(
         last_option.sub_grid_column,
         last_option.sub_grid_row,
@@ -1050,13 +1034,12 @@ impl<'a> Grid<'a> {
   }
 
   fn remove_if_extra_options_from_row(&mut self, limited_options: &Vec<LimitedBitOption>) -> bool {
-    let mut last_options: Vec<BitOption> = Vec::new();
+    let mut last_options = Vec::new();
 
-    let mut limited_option: &LimitedBitOption;
     let mut index = limited_options.len();
 		while index > 0 {
 			index -= 1;
-      limited_option = &limited_options[index];
+      let limited_option = &limited_options[index];
       for column in 0..self.dimensions.columns {
         last_options.append(
           &mut self.sub_grids[(limited_option.row / self.dimensions.columns) >> 0][column]
@@ -1068,11 +1051,10 @@ impl<'a> Grid<'a> {
       }
     }
 
-    let mut last_option: &BitOption;
     index = last_options.len();
 		while index > 0 {
 			index -= 1;
-      last_option = &last_options[index];
+      let last_option = &last_options[index];
       self.strike_out(
         last_option.sub_grid_column,
         last_option.sub_grid_row,
@@ -1087,24 +1069,22 @@ impl<'a> Grid<'a> {
   }
 
   fn remove_if_extra_options_from_sub_grid(&mut self, limited_options: &Vec<LimitedBitOption>) -> bool {
-    let mut last_options: Vec<BitOption> = Vec::new();
+    let mut last_options = Vec::new();
 
-    let mut limited_option: &LimitedBitOption;
     let mut index = limited_options.len();
 		while index > 0 {
 			index -= 1;
-      limited_option = &limited_options[index];
+      let limited_option = &limited_options[index];
       last_options.append(
         &mut self.sub_grids[limited_option.row][limited_option.column]
           .remove_if_extra_options(limited_option.options)
       )
     }
 
-    let mut last_option: &BitOption;
     index = last_options.len();
 		while index > 0 {
 			index -= 1;
-      last_option = &last_options[index];
+      let last_option = &last_options[index];
       self.strike_out(
         last_option.sub_grid_column,
         last_option.sub_grid_row,
@@ -1342,13 +1322,13 @@ impl<'a> Grid<'a> {
 		let mut total_existing_rows = 0;
 
 		let mut existing_row = 0;
-		let mut row: usize = self.dimensions.columns - 1;               // Use SubGrid's number of rows i.e. swopped columns
+		let mut row = self.dimensions.columns - 1;                      // Use SubGrid's number of rows i.e. swopped columns
 		while total_existing_rows < 2 && row > cell_row {
 			if self.sub_grids[sub_grid_row][sub_grid_column].option_exists_in_row(row, option) {
 				existing_row = row;
 				total_existing_rows += 1;
-				row -= 1;
 			}
+      row -= 1;
 		}
 		while total_existing_rows < 2 && row > 0 {
 			row -= 1;
