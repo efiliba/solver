@@ -113,9 +113,6 @@ mod grid_2x2 {
     grid.fix_by_position(0, 0, 1, 0, 1, 0);                         // Set top 2nd cell to 2
     grid.fix_by_position(1, 0, 0, 0, 0, 1);                         // Set top 3rd cell to 3
 
-        print!("{:#}", grid);
-    assert!(false);
-    
     //        |       ||       |       |              |       ||       |       |
     //    1   |   2   ||   3   |   4   |          1   |   2   ||   4   |   8   |
     //        |       ||       |       |              |       ||       |       |
@@ -273,7 +270,6 @@ mod grid_2x2 {
     assert!(grid.compare(&expected_sub_grids));
   }
 
-
   #[test]
   fn it_solves_a_2x2_grid() {
     let columns = 2;
@@ -303,21 +299,34 @@ mod grid_3x2 {
     let dimensions = Dimensions::new(columns, rows);
     let mut grid = Grid::new(&dimensions);
 
-    // print!("{}", grid);
+    grid.set_by_symbol(0, 0, 2, 1, '2', SetMethod::Loaded);
+    grid.set_by_symbol(1, 0, 0, 0, '1', SetMethod::Loaded);
+    grid.set_by_symbol(1, 0, 2, 1, '3', SetMethod::Loaded);
+    grid.set_by_symbol(0, 1, 0, 0, '4', SetMethod::Loaded);
+    grid.set_by_symbol(0, 1, 2, 1, '3', SetMethod::Loaded);
+    grid.set_by_symbol(1, 1, 0, 0, '3', SetMethod::Loaded);
+    grid.set_by_symbol(1, 1, 2, 1, '5', SetMethod::Loaded);
+    grid.set_by_symbol(0, 2, 0, 0, '3', SetMethod::Loaded);
+    grid.set_by_symbol(0, 2, 2, 1, '1', SetMethod::Loaded);
+    grid.set_by_symbol(1, 2, 0, 0, '6', SetMethod::Loaded);
 
-      grid.set_by_symbol(0, 0, 2, 1, '2', SetMethod::Loaded);
-      grid.set_by_symbol(1, 0, 0, 0, '1', SetMethod::Loaded);
-      grid.set_by_symbol(1, 0, 2, 1, '3', SetMethod::Loaded);
-      grid.set_by_symbol(0, 1, 0, 0, '4', SetMethod::Loaded);
-      grid.set_by_symbol(0, 1, 2, 1, '3', SetMethod::Loaded);
-      grid.set_by_symbol(1, 1, 0, 0, '3', SetMethod::Loaded);
-      grid.set_by_symbol(1, 1, 2, 1, '5', SetMethod::Loaded);
-      grid.set_by_symbol(0, 2, 0, 0, '3', SetMethod::Loaded);
-      grid.set_by_symbol(0, 2, 2, 1, '1', SetMethod::Loaded);
-      grid.set_by_symbol(1, 2, 0, 0, '6', SetMethod::Loaded);
+    // [48, 60, 56, 1, 58, 42]
+    // [49, 57, 2, 24, 56, 4]
+    // [8, 51, 48, 4, 35, 35]
+    // [35, 35, 4, 10, 43, 16]
+    // [4, 26, 24, 32, 27, 11]
+    // [50, 58, 1, 26, 30, 10]
 
-     
-    // print!("{:#}", grid);
-    // assert!(false);
+    grid.solve();
+
+    // [48, 4, 56, 1, 58, 42]       <- 60 changed to 4: correct
+    // [49, 57, 2, 24, 56, 4]
+    // [8, 51, 48, 4, 35, 35]
+    // [35, 35, 4, 10, 43, 16]
+    // [4, 26, 24, 32, 27, 11]
+    // [50, 58, 1, 26, 4, 10]       <- 30 changed to 4: correct
+
+    print!("{:#}", grid);
+    assert!(false);
   }
 }

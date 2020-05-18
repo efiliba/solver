@@ -94,7 +94,7 @@ mod array_utils {
       vec![11,  7, 11,  7]
     ];
 
-    let actual = transpose_rows(&rows);
+    let actual = transpose_rows(2, &rows);
 
     let expected = vec![
       vec![ 1,  2,  4,  8],                                         // transposed top row

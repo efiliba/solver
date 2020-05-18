@@ -55,13 +55,14 @@ pub fn combine_rows(rows: &Vec<&[usize]>) -> Vec<Vec<usize>> {
 //   [ 9, 10, 11, 12]             [ 9, 10, 13, 14],
 //   [13, 14, 15, 16]             [11, 12, 15, 16]
 // ]                            ]
-pub fn transpose_rows(rows: &Vec<Vec<usize>>) -> Vec<Vec<usize>> {
-  let root = (rows.len() as f64).sqrt() as usize;
+pub fn transpose_rows(columns: usize, rows: &Vec<Vec<usize>>) -> Vec<Vec<usize>> {
+  let segments = rows.len() / columns;
+  let size = rows.len() / segments;
   let mut transposed: Vec<Vec<usize>> = Vec::with_capacity(rows.len());
 
-  for index in 0..root {
-    let from = index * root;
-    transposed.extend(combine_rows(&square_rows(&rows[from..from + root])));
+  for index in 0..segments {
+    let from = index * size;
+    transposed.extend(combine_rows(&square_rows(&rows[from..from + size])));
   }
 
   transposed

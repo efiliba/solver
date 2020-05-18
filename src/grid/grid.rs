@@ -4,7 +4,7 @@ use crate::utils::bit_utils::{number_of_bits_set, bitwise_or, only_option, conta
 use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod, SYMBOLS};
 use crate::sub_grid::{sub_grid::SubGrid, BitOption, StruckOutCells};
 use crate::grid::{LimitedBitOption};
-use crate::utils::array_utils::{transpose_rows};
+use crate::utils::array_utils;
 
 #[derive(Debug)]
 pub struct Grid<'a> {
@@ -18,7 +18,7 @@ pub struct Grid<'a> {
 impl Display for Grid<'_> {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     let options_rows = self.available_options_rows();
-    let transposed_rows = transpose_rows(&options_rows);
+    let transposed_rows = array_utils::transpose_rows(self.dimensions.columns, &options_rows);
 		let mut output = String::new();
     
     for row in transposed_rows.iter() {
