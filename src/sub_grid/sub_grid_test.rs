@@ -152,7 +152,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     expected_cells[0][0].options |= 1;                              // Re-add the bit removed in setting up from previous test
 
     expected_cells[test_row][test_column].reset();                  // No options removed
-    expected_cells[test_row][test_column].remove_option(1);					// Remove previous bit
+    expected_cells[test_row][test_column].remove_option(1);          // Remove previous bit
 
     assert!(sub_grid.compare(&expected_cells));
   }
@@ -332,7 +332,7 @@ mod strikes_out_options_in_3x2_sub_grid {
     let test_column = 2;
     let test_row = 1;
 
-    assert_eq!(sub_grid.solved(), false);                     		  // Not solved yet
+    assert_eq!(sub_grid.solved(), false);                           // Not solved yet
     assert_eq!(sub_grid.get(2, 1).set_method, SetMethod::Calculated); // But bottom right cell has been set
 
     let struck_out_cells = sub_grid.strike_out_cell(test_column, test_row, remove_bit);
@@ -357,15 +357,15 @@ mod strikes_out_options_in_3x2_sub_grid {
     assert_eq!(struck_out_cells.removed_options_from_column.len(), 0);  // No options to remove from column nor row
     assert_eq!(struck_out_cells.removed_options_from_row.len(), 0);
 
-		// 	expect(subGrid.toJson()).toEqual({
-		// 		rows:
-		// 		[
-		// 			{ columns: [{ symbol: '1' }, { symbol: '2' }, { symbol: '3' }] },
-		// 			{ columns: [{ symbol: '4' }, { symbol: '5' }, { symbol: '6' }] }
-		// 		]
-		// 	});
+    //   expect(subGrid.toJson()).toEqual({
+    //     rows:
+    //     [
+    //       { columns: [{ symbol: '1' }, { symbol: '2' }, { symbol: '3' }] },
+    //       { columns: [{ symbol: '4' }, { symbol: '5' }, { symbol: '6' }] }
+    //     ]
+    //   });
 
-    assert!(sub_grid.solved());                     		            // Sub grid solved
+    assert!(sub_grid.solved());                                     // Sub grid solved
 
     // Re-check - cells set by their position 
     let mut expected_cells = super::init_cells(&dimensions);
@@ -396,7 +396,7 @@ mod sub_grid_2x2 {
     let expected_cells = super::init_cells(&dimensions);
     assert!(sub_grid.compare(&expected_cells));
     
-    sub_grid.set_by_position(0, 0, 0, 0, SetMethod::User);        	// Top left cell set to 1
+    sub_grid.set_by_position(0, 0, 0, 0, SetMethod::User);          // Top left cell set to 1
     sub_grid.set_by_position(1, 0, 1, 0, SetMethod::User);          // Top right cell set to 2
     sub_grid.set_by_position(0, 1, 0, 1, SetMethod::User);          // Bottom left cell set to 4
     assert_eq!(sub_grid.get(1, 1).options, 15);                     // Nothing removed from bottom right cell

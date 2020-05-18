@@ -3,9 +3,9 @@ use crate::cell::SYMBOLS;
 
 #[derive(Debug)]
 pub struct JsonCellColumn {
-	symbol: char,
-	strike_out: bool,
-	highlight: bool
+  symbol: char,
+  strike_out: bool,
+  highlight: bool
 }
 
 // impl Display for JsonCellColumn {

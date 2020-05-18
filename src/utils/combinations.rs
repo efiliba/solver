@@ -14,7 +14,7 @@ impl Combinations {
       for bit in 0..set_bits_length {                               // Get indices of items with respective choices
         if set_bits[bit] == index {
           lookup_row.push(bit);
-				}
+        }
       }
       set_bits_lookup_table.push(lookup_row);
     }
@@ -23,19 +23,19 @@ impl Combinations {
   }
 
   pub fn select<'a, T>(&self, from: &'a Vec<T>, pick: usize) -> Vec<Vec<&'a T>> {
-		// Get bit flags used to select the combinations from the lookup table, up to the number of items to select from
+    // Get bit flags used to select the combinations from the lookup table, up to the number of items to select from
     let set_bits = 1 << from.len();
-		let lookup_table = &self.set_bits_lookup_table[pick];
-		let mut combinations = Vec::with_capacity(lookup_table.len());
+    let lookup_table = &self.set_bits_lookup_table[pick];
+    let mut combinations = Vec::with_capacity(lookup_table.len());
 
     for index in 0..lookup_table.len() {
-			if lookup_table[index] < set_bits {
-				combinations.push(select_elements(&from, lookup_table[index]));
-			}
-		}
+      if lookup_table[index] < set_bits {
+        combinations.push(select_elements(&from, lookup_table[index]));
+      }
+    }
 
-		combinations
-	}
+    combinations
+  }
 }
 
 // Populate array with the number of bits set i.e. [0] => 0, [1] => 1, [2] => 1, [3] => 2, ..., [333] => 5 (i.e. 101001101 has 5 bits set)

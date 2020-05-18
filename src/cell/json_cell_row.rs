@@ -2,7 +2,7 @@ use super::json_cell_column::JsonCellColumn;
 
 #[derive(Debug)]
 pub struct JsonCellRow {
-	pub columns: Vec<JsonCellColumn>
+  pub columns: Vec<JsonCellColumn>
 }
 
 impl JsonCellRow {

@@ -29,7 +29,7 @@ mod grid {
     let mut grid = Grid::new(&dimensions);
     assert_eq!(grid.solve(), false);                                // Not solved yet
 
-    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded);           // Set top left cell to 1
 
     assert!(grid.solve());
   }
@@ -41,8 +41,8 @@ mod grid {
     let dimensions = Dimensions::new(columns, rows);
     let mut grid = Grid::new(&dimensions);
 
-    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
-    grid.set_by_option(1, 0, 0, 1, 2, SetMethod::Loaded); 				  // Middle cell to 2
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded);           // Set top left cell to 1
+    grid.set_by_option(1, 0, 0, 1, 2, SetMethod::Loaded);           // Middle cell to 2
 
     assert!(grid.solve());
   }
@@ -68,7 +68,7 @@ mod grid {
     let mut expected_sub_grids = super::init_sub_grids(&dimensions);
     assert!(grid.compare(&expected_sub_grids));
 
-    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded);           // Set top left cell to 1
     grid.set_by_option(0, 1, 0, 0, 2, SetMethod::Loaded);           // Set next top cell to 2
     grid.set_by_option(0, 2, 0, 0, 4, SetMethod::Loaded);           // Set 3rd cell to 3
     

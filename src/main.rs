@@ -22,8 +22,8 @@ use solver::utils::array_utils::{square_rows, combine_rows, transpose_rows};
 
         println!("{}", &grid);
 
-    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
-    grid.set_by_option(1, 0, 0, 1, 2, SetMethod::Loaded); 				  // Middle cell to 2
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded);           // Set top left cell to 1
+    grid.set_by_option(1, 0, 0, 1, 2, SetMethod::Loaded);           // Middle cell to 2
 
         println!("Solved:\n{}", &grid);
     // assert!(grid.solve());

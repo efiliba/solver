@@ -19,7 +19,7 @@ pub const SYMBOLS: [char; 36] = [                                   // Max 6 x 6
 #[derive(Copy, Clone, Debug, PartialEq)] 
 pub enum SetMethod {
   Unset,
-	Loaded,
-	User,
-	Calculated
+  Loaded,
+  User,
+  Calculated
 }

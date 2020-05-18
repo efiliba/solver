@@ -6,12 +6,12 @@ mod select {
   fn it_returns_c_4_1_is_4() {
     let combinations = Combinations::new(4);                        // columns * rows
     let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 1;
-		let actual = combinations.select(&from, pick);
+    let pick = 1;
+    let actual = combinations.select(&from, pick);
 
     println!("{:?}", actual);
     // assert!(false);
-		let expected = vec![
+    let expected = vec![
       vec![&'a'],
       vec![&'b'],
       vec![&'c'],
@@ -25,10 +25,10 @@ mod select {
   fn it_returns_c_4_2_is_6() {                                      // C(4, 2) = 4 * 3 / 2 = 6
     let combinations = Combinations::new(4);
     let from = vec![1, 2, 3, 4];
-		let pick = 2;
-		let actual = combinations.select(&from, pick);
+    let pick = 2;
+    let actual = combinations.select(&from, pick);
 
-		let expected = vec![
+    let expected = vec![
       vec![&1, &2],
       vec![&1, &3],
       vec![&2, &3],
@@ -44,10 +44,10 @@ mod select {
   fn it_returns_c_4_3_is_4() {
     let combinations = Combinations::new(4);
     let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 3;
-		let actual = combinations.select::<char>(&from, pick);
+    let pick = 3;
+    let actual = combinations.select::<char>(&from, pick);
 
-		let expected = vec![
+    let expected = vec![
       vec![&'a', &'b', &'c'],
       vec![&'a', &'b', &'d'],
       vec![&'a', &'c', &'d'],
@@ -61,10 +61,10 @@ mod select {
   fn it_returns_c_4_4_is_1() {
     let combinations = Combinations::new(4);
     let from = ['a', 'b', 'c', 'd'].to_vec();
-		let pick = 4;
-		let actual = combinations.select::<char>(&from, pick);
+    let pick = 4;
+    let actual = combinations.select::<char>(&from, pick);
 
-		let expected = vec![vec![&'a', &'b', &'c', &'d']];
+    let expected = vec![vec![&'a', &'b', &'c', &'d']];
 
     assert_eq!(expected, actual);
   }
