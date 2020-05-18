@@ -4,11 +4,7 @@ use crate::utils::bit_utils::{number_of_bits_set, bitwise_or, only_option, conta
 use crate::cell::{cell::Cell, dimensions::Dimensions, SetMethod, SYMBOLS};
 use crate::sub_grid::{sub_grid::SubGrid, BitOption, StruckOutCells};
 use crate::grid::{LimitedBitOption};
-
-// import {IOnlyOption, bitwise_or, number_of_bits_set, only_option, containingBitIndex} from "./utils/bitUtilities";
-// import {Combinations} from "./utils/combinations";
-// import {SetMethod, ICell, IJsonCell} from "./cell";
-// import {SubGrid, ISubGrid, BitOption, DebugSubGridType, IStruckOutCells, IJsonSubGrid} from "./subGrid";
+use crate::utils::array_utils::{transpose_rows};
 
 #[derive(Debug)]
 pub struct Grid<'a> {
@@ -18,21 +14,15 @@ pub struct Grid<'a> {
   sub_grids: Vec<Vec<SubGrid<'a>>>,                                 // use get(column, row) -> returns sub-grids[row][column]
   total_set: usize
 }
-  
+
 impl Display for Grid<'_> {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-    fn add_new_line(output: &mut String) {
-      fmt::write(output, format_args!("\n")).expect("Error adding new line in grid");
-    }
-
+    let options_rows = self.available_options_rows();
+    let transposed_rows = transpose_rows(&options_rows);
 		let mut output = String::new();
-		
-    for row in 0..self.dimensions.rows {
-      for column in 0..self.dimensions.columns {
-        fmt::write(&mut output, format_args!("{}", self.sub_grids[row][column]))
-          .expect("Error writing cell in grid");
-      }
-      add_new_line(&mut output);
+    
+    for row in transposed_rows.iter() {
+      fmt::write(&mut output, format_args!("{:?}\n", row)).expect("Error writing cell in grid");
     }
 
     write!(formatter, "{}", output)
@@ -88,6 +78,30 @@ impl<'a> Grid<'a> {
 
     equal
   }
+
+  pub fn available_options_rows(&self) -> Vec<Vec<usize>> {
+    let mut options_rows = Vec::with_capacity(self.dimensions.total);
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        options_rows.push(self.sub_grids[row][column].available_options_row());
+      }
+    }
+
+    options_rows
+  }
+
+  // pub fn available_options_rows(&self) -> Vec<Vec<usize>> {
+  //   let mut options_rows = Vec::with_capacity(self.dimensions.rows);
+  //   for row in 0..self.dimensions.rows {
+  //     let mut options_row = Vec::with_capacity(self.dimensions.columns);
+  //     for column in 0..self.dimensions.columns {
+  //       options_row.extend(self.sub_grids[row][column].available_options_row());
+  //     }
+  //     options_rows.push(options_row);
+  //   }
+
+  //   options_rows
+  // }
 
 	pub fn solve(&mut self) -> bool {
 		self.simplify();
@@ -556,28 +570,28 @@ impl<'a> Grid<'a> {
 		self.strike_out(sub_grid_column, sub_grid_row, cell_column, cell_row, option);
   }
 	
-/*
-  public setBySymbol(
+  pub fn set_by_symbol(
+    &mut self,
     sub_grid_column: usize,
     sub_grid_row: usize,
     cell_column: usize,
     cell_row: usize,
-    symbol: string,
-    set_method: SetMethod = SetMethod.user
+    symbol: char,
+    set_method: SetMethod
   ) {
-    const option = self.sub_grids[sub_grid_row][sub_grid_column].setBySymbol(
+    let option = self.sub_grids[sub_grid_row][sub_grid_column].set_by_symbol(
       cell_column,
       cell_row,
       symbol,
       set_method
     );
-    if (option > 0) {
-      self.total_set++;
+    if option > 0 {
+      self.total_set += 1;
     }
 
     self.strike_out(sub_grid_column, sub_grid_row, cell_column, cell_row, option);
   }
-
+/*
   public setByPositionShallow(
     sub_grid_column: usize,
     sub_grid_row: usize,

@@ -85,6 +85,18 @@ impl<'a> SubGrid<'a> {
     &self.cells[row][column]
   }
 
+  pub fn available_options_row(&self) -> Vec<usize> {
+    let mut options_row = Vec::with_capacity(self.dimensions.total);
+
+    for row in 0..self.dimensions.rows {
+      for column in 0..self.dimensions.columns {
+        options_row.push(self.cells[row][column].options);
+      }
+    }
+
+    options_row
+  }
+
   pub fn set_by_position(
     &mut self,
     column: usize,

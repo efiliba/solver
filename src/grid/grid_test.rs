@@ -113,6 +113,9 @@ mod grid_2x2 {
     grid.fix_by_position(0, 0, 1, 0, 1, 0);                         // Set top 2nd cell to 2
     grid.fix_by_position(1, 0, 0, 0, 0, 1);                         // Set top 3rd cell to 3
 
+        print!("{:#}", grid);
+    assert!(false);
+    
     //        |       ||       |       |              |       ||       |       |
     //    1   |   2   ||   3   |   4   |          1   |   2   ||   4   |   8   |
     //        |       ||       |       |              |       ||       |       |
@@ -285,5 +288,36 @@ mod grid_2x2 {
 
     grid.set_by_option(1, 0, 1, 0, 2, SetMethod::User);             // top right set to 2
     assert!(grid.solve());
+  }
+}
+
+#[cfg(test)]
+mod grid_3x2 {
+  use crate::cell::{dimensions::Dimensions, SetMethod};
+  use crate::grid::grid::Grid;
+
+  #[test]
+  fn it_solves_a_2x3_grid() {
+    let columns = 2;
+    let rows = 3;
+    let dimensions = Dimensions::new(columns, rows);
+    let mut grid = Grid::new(&dimensions);
+
+    // print!("{}", grid);
+
+      grid.set_by_symbol(0, 0, 2, 1, '2', SetMethod::Loaded);
+      grid.set_by_symbol(1, 0, 0, 0, '1', SetMethod::Loaded);
+      grid.set_by_symbol(1, 0, 2, 1, '3', SetMethod::Loaded);
+      grid.set_by_symbol(0, 1, 0, 0, '4', SetMethod::Loaded);
+      grid.set_by_symbol(0, 1, 2, 1, '3', SetMethod::Loaded);
+      grid.set_by_symbol(1, 1, 0, 0, '3', SetMethod::Loaded);
+      grid.set_by_symbol(1, 1, 2, 1, '5', SetMethod::Loaded);
+      grid.set_by_symbol(0, 2, 0, 0, '3', SetMethod::Loaded);
+      grid.set_by_symbol(0, 2, 2, 1, '1', SetMethod::Loaded);
+      grid.set_by_symbol(1, 2, 0, 0, '6', SetMethod::Loaded);
+
+     
+    // print!("{:#}", grid);
+    // assert!(false);
   }
 }

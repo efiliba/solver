@@ -2,61 +2,47 @@ extern crate solver;
 
 // use solver::utils::{bit_utils, combinations::Combinations};
 use solver::cell::cell::Cell2;
-use solver::cell::{cell::Cell, dimensions::Dimensions};
+use solver::cell::{cell::Cell, dimensions::Dimensions, SetMethod};
 use solver::sub_grid::sub_grid::SubGrid;
 use solver::grid::grid::Grid;
 use solver::utils::combinations::Combinations;
+use solver::utils::array_utils::{square_rows, combine_rows, transpose_rows};
+
 
 // use solver::utils::bit_utils::highest_bit_position;
 
-	fn select_elements<'a, T>(from: &'a Vec<T>, select: usize) -> Vec<&'a T> {
-		let mut elements = Vec::with_capacity(from.len());
-    for index in 0..from.len() {
-			if (1 << index) & select > 0 {
-				elements.push(&from[index]);
-			}
-		}
 
-		elements
-	}
+
+  fn it_solves_a_3x1_grid() {
+    let columns = 3;
+    let rows = 1;
+    let dimensions = Dimensions::new(columns, rows);
+    let mut grid = Grid::new(&dimensions);
+    // assert_eq!(grid.solve(), false);
+
+        println!("{}", &grid);
+
+    grid.set_by_option(0, 0, 0, 0, 1, SetMethod::Loaded); 				  // Set top left cell to 1
+    grid.set_by_option(1, 0, 0, 1, 2, SetMethod::Loaded); 				  // Middle cell to 2
+
+        println!("Solved:\n{}", &grid);
+    // assert!(grid.solve());
+    assert!(false);
+  }
+
 
 fn main() {
   
-  // assert_eq!(&format!("{:#}", Foo(23)), "Foo(23)");
-  // assert_eq!(&format!("{}", Foo(23)), "23");
-  // println!("1: {:#}", Foo {bar: 23});
-  // println!("2: {}", Foo {bar: 24});
-  // let combinations = Combinations::new(4);                          // Columns * rows
+    let columns = 2;
+    let rows = 2;
+    let dimensions = Dimensions::new(columns, rows);
+    let mut grid = Grid::new(&dimensions);
 
-  // println!("Bits set in main: {}", bit_utils::number_of_bits_set(333)); // 333 = 101001101
+    grid.fix_by_position(0, 0, 0, 0, 0, 0);                         // Set top left cell to 1
+    grid.fix_by_position(0, 0, 1, 0, 1, 0);                         // Set top 2nd cell to 2
+    grid.fix_by_position(1, 0, 0, 0, 0, 1);                         // Set top 3rd cell to 3
 
+    print!("{:#}", grid);
   println!("======================================");
 
-    let combinations = Combinations::new(4);
-    let from = vec!['1', '2', '3'];
-		let pick = 2;
-    let actual = combinations.select(&from, pick);
-  
-    
-    println!("{:?}", actual);
-
-
-  // let mut cell2 = Cell2::new(1, 1);
-  // match cell2 {
-  //   Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
-  //   Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
-  // };
-
-  // cell2.change();
-  // match cell2 {
-  //   Cell2::OptionsCell { column, row } => println!("OptionsCell: ({}:{})", column, row),
-  //   Cell2::SetCell { symbol } => println!("Symbol: {}", symbol),
-  // };
-
-  // println!("======================================\n");
-
-  
-  println!("__________________");
-
-  // cell.json.print();
 }
